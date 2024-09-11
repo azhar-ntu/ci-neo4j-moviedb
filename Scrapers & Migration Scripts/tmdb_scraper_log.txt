@@ -1,0 +1,11 @@
+2024-09-08 19:57:19,870 - INFO - Script started
+2024-09-08 19:57:20,401 - ERROR - Error processing actors from file: 'media_type'
+2024-09-08 19:57:20,401 - WARNING - No valid actor data to export
+2024-09-08 19:57:20,401 - INFO - Script finished
+2024-09-08 19:59:56,260 - INFO - Script started
+2024-09-08 19:59:56,534 - ERROR - Error processing actors from file: 'results'
+2024-09-08 19:59:56,535 - WARNING - No valid actor data to export
+2024-09-08 19:59:56,535 - INFO - Script finished
+2024-09-08 20:00:57,970 - INFO - Script started
+2024-09-08 20:01:37,852 - INFO - Data successfully exported to actors_movies_tmdb.csv
+2024-09-08 20:01:37,852 - INFO - Script finished

@@ -1,0 +1,254 @@
+2024-09-08 19:35:08,339 - INFO - Script started
+2024-09-08 19:35:08,339 - INFO - Sending request for Robert Downey Jr. to URL: https://en.wikipedia.org/wiki/Robert_Downey_Jr.
+2024-09-08 19:35:08,553 - INFO - Sending request for Robert Downey Jr. to URL: https://en.wikipedia.org/wiki/Robert_Downey_Jr._filmography
+2024-09-08 19:35:08,633 - INFO - Successfully processed Robert Downey Jr.
+2024-09-08 19:35:10,637 - INFO - Sending request for Scarlett Johansson to URL: https://en.wikipedia.org/wiki/Scarlett_Johansson
+2024-09-08 19:35:10,905 - INFO - Sending request for Scarlett Johansson to URL: https://en.wikipedia.org/wiki/Scarlett_Johansson_filmography
+2024-09-08 19:35:12,126 - INFO - Sending request for Scarlett Johansson to URL: https://en.wikipedia.org/wiki/List_of_Scarlett_Johansson_performances
+2024-09-08 19:35:13,011 - WARNING - No movies found for Scarlett Johansson
+2024-09-08 19:35:15,013 - INFO - Sending request for Chris Evans to URL: https://en.wikipedia.org/wiki/Chris_Evans
+2024-09-08 19:35:15,055 - INFO - Sending request for Chris Evans to URL: https://en.wikipedia.org/wiki/Chris_Evans_filmography
+2024-09-08 19:35:16,063 - INFO - Sending request for Chris Evans to URL: https://en.wikipedia.org/wiki/List_of_Chris_Evans_performances
+2024-09-08 19:35:16,138 - WARNING - No movies found for Chris Evans
+2024-09-08 19:35:18,142 - INFO - Sending request for Brie Larson to URL: https://en.wikipedia.org/wiki/Brie_Larson
+2024-09-08 19:35:18,355 - INFO - Sending request for Brie Larson to URL: https://en.wikipedia.org/wiki/Brie_Larson_filmography
+2024-09-08 19:35:19,561 - INFO - Successfully processed Brie Larson
+2024-09-08 19:35:21,565 - INFO - Sending request for Chadwick Boseman to URL: https://en.wikipedia.org/wiki/Chadwick_Boseman
+2024-09-08 19:35:21,801 - INFO - Successfully processed Chadwick Boseman
+2024-09-08 19:35:23,806 - INFO - Sending request for Elizabeth Olsen to URL: https://en.wikipedia.org/wiki/Elizabeth_Olsen
+2024-09-08 19:35:23,940 - INFO - Sending request for Elizabeth Olsen to URL: https://en.wikipedia.org/wiki/Elizabeth_Olsen_filmography
+2024-09-08 19:35:24,833 - INFO - Sending request for Elizabeth Olsen to URL: https://en.wikipedia.org/wiki/List_of_Elizabeth_Olsen_performances
+2024-09-08 19:35:25,320 - WARNING - No movies found for Elizabeth Olsen
+2024-09-08 19:35:27,325 - INFO - Sending request for Chris Hemsworth to URL: https://en.wikipedia.org/wiki/Chris_Hemsworth
+2024-09-08 19:35:27,469 - INFO - Successfully processed Chris Hemsworth
+2024-09-08 19:35:29,475 - INFO - Sending request for Zoe Saldana to URL: https://en.wikipedia.org/wiki/Zoe_Saldana
+2024-09-08 19:35:29,611 - INFO - Successfully processed Zoe Saldana
+2024-09-08 19:35:31,617 - INFO - Sending request for Mark Ruffalo to URL: https://en.wikipedia.org/wiki/Mark_Ruffalo
+2024-09-08 19:35:31,752 - INFO - Sending request for Mark Ruffalo to URL: https://en.wikipedia.org/wiki/Mark_Ruffalo_filmography
+2024-09-08 19:35:32,201 - INFO - Sending request for Mark Ruffalo to URL: https://en.wikipedia.org/wiki/List_of_Mark_Ruffalo_performances
+2024-09-08 19:35:32,874 - WARNING - No movies found for Mark Ruffalo
+2024-09-08 19:35:34,877 - INFO - Sending request for Natalie Portman to URL: https://en.wikipedia.org/wiki/Natalie_Portman
+2024-09-08 19:35:35,086 - INFO - Sending request for Natalie Portman to URL: https://en.wikipedia.org/wiki/Natalie_Portman_filmography
+2024-09-08 19:35:35,169 - INFO - Sending request for Natalie Portman to URL: https://en.wikipedia.org/wiki/List_of_Natalie_Portman_performances
+2024-09-08 19:35:35,847 - WARNING - No movies found for Natalie Portman
+2024-09-08 19:35:37,853 - INFO - Sending request for Paul Rudd to URL: https://en.wikipedia.org/wiki/Paul_Rudd
+2024-09-08 19:35:37,970 - INFO - Sending request for Paul Rudd to URL: https://en.wikipedia.org/wiki/Paul_Rudd_filmography
+2024-09-08 19:35:38,795 - INFO - Sending request for Paul Rudd to URL: https://en.wikipedia.org/wiki/List_of_Paul_Rudd_performances
+2024-09-08 19:35:39,273 - WARNING - No movies found for Paul Rudd
+2024-09-08 19:35:41,277 - INFO - Sending request for Evangeline Lilly to URL: https://en.wikipedia.org/wiki/Evangeline_Lilly
+2024-09-08 19:35:41,394 - INFO - Successfully processed Evangeline Lilly
+2024-09-08 19:35:43,400 - INFO - Sending request for Benedict Cumberbatch to URL: https://en.wikipedia.org/wiki/Benedict_Cumberbatch
+2024-09-08 19:35:43,615 - INFO - Sending request for Benedict Cumberbatch to URL: https://en.wikipedia.org/wiki/Benedict_Cumberbatch_filmography
+2024-09-08 19:35:44,841 - INFO - Successfully processed Benedict Cumberbatch
+2024-09-08 19:35:46,845 - INFO - Sending request for Tessa Thompson to URL: https://en.wikipedia.org/wiki/Tessa_Thompson
+2024-09-08 19:35:46,970 - INFO - Successfully processed Tessa Thompson
+2024-09-08 19:35:48,974 - INFO - Sending request for Tom Holland to URL: https://en.wikipedia.org/wiki/Tom_Holland
+2024-09-08 19:35:49,103 - INFO - Sending request for Tom Holland to URL: https://en.wikipedia.org/wiki/Tom_Holland_filmography
+2024-09-08 19:35:50,108 - INFO - Sending request for Tom Holland to URL: https://en.wikipedia.org/wiki/List_of_Tom_Holland_performances
+2024-09-08 19:35:51,394 - WARNING - No movies found for Tom Holland
+2024-09-08 19:35:53,397 - INFO - Sending request for Zendaya to URL: https://en.wikipedia.org/wiki/Zendaya
+2024-09-08 19:35:53,586 - INFO - Successfully processed Zendaya
+2024-09-08 19:35:55,591 - INFO - Sending request for Chris Pratt to URL: https://en.wikipedia.org/wiki/Chris_Pratt
+2024-09-08 19:35:55,725 - INFO - Successfully processed Chris Pratt
+2024-09-08 19:35:57,730 - INFO - Sending request for Karen Gillan to URL: https://en.wikipedia.org/wiki/Karen_Gillan
+2024-09-08 19:35:57,857 - INFO - Successfully processed Karen Gillan
+2024-09-08 19:35:59,859 - INFO - Sending request for Dave Bautista to URL: https://en.wikipedia.org/wiki/Dave_Bautista
+2024-09-08 19:36:00,046 - INFO - Successfully processed Dave Bautista
+2024-09-08 19:36:02,050 - INFO - Sending request for Pom Klementieff to URL: https://en.wikipedia.org/wiki/Pom_Klementieff
+2024-09-08 19:36:02,116 - INFO - Successfully processed Pom Klementieff
+2024-09-08 19:36:04,121 - INFO - Sending request for Samuel L. Jackson to URL: https://en.wikipedia.org/wiki/Samuel_L._Jackson
+2024-09-08 19:36:04,328 - INFO - Sending request for Samuel L. Jackson to URL: https://en.wikipedia.org/wiki/Samuel_L._Jackson_filmography
+2024-09-08 19:36:05,853 - INFO - Successfully processed Samuel L. Jackson
+2024-09-08 19:36:07,854 - INFO - Sending request for Cobie Smulders to URL: https://en.wikipedia.org/wiki/Cobie_Smulders
+2024-09-08 19:36:07,956 - INFO - Successfully processed Cobie Smulders
+2024-09-08 19:36:09,957 - INFO - Sending request for Jeremy Renner to URL: https://en.wikipedia.org/wiki/Jeremy_Renner
+2024-09-08 19:36:10,067 - INFO - Successfully processed Jeremy Renner
+2024-09-08 19:36:12,072 - INFO - Sending request for Danai Gurira to URL: https://en.wikipedia.org/wiki/Danai_Gurira
+2024-09-08 19:36:12,182 - INFO - Successfully processed Danai Gurira
+2024-09-08 19:36:14,184 - INFO - Sending request for Sebastian Stan to URL: https://en.wikipedia.org/wiki/Sebastian_Stan
+2024-09-08 19:36:14,272 - INFO - Successfully processed Sebastian Stan
+2024-09-08 19:36:16,274 - INFO - Sending request for Letitia Wright to URL: https://en.wikipedia.org/wiki/Letitia_Wright
+2024-09-08 19:36:16,385 - INFO - Successfully processed Letitia Wright
+2024-09-08 19:36:18,390 - INFO - Sending request for Anthony Mackie to URL: https://en.wikipedia.org/wiki/Anthony_Mackie
+2024-09-08 19:36:18,473 - INFO - Successfully processed Anthony Mackie
+2024-09-08 19:36:20,474 - INFO - Sending request for Lupita Nyong'o to URL: https://en.wikipedia.org/wiki/Lupita_Nyong%27o
+2024-09-08 19:36:20,679 - INFO - Successfully processed Lupita Nyong'o
+2024-09-08 19:36:22,684 - INFO - Sending request for Don Cheadle to URL: https://en.wikipedia.org/wiki/Don_Cheadle
+2024-09-08 19:36:22,833 - INFO - Sending request for Don Cheadle to URL: https://en.wikipedia.org/wiki/Don_Cheadle_filmography
+2024-09-08 19:36:23,497 - INFO - Sending request for Don Cheadle to URL: https://en.wikipedia.org/wiki/List_of_Don_Cheadle_performances
+2024-09-08 19:36:23,574 - WARNING - No movies found for Don Cheadle
+2024-09-08 19:36:25,579 - INFO - Sending request for Gwyneth Paltrow to URL: https://en.wikipedia.org/wiki/Gwyneth_Paltrow
+2024-09-08 19:36:25,784 - INFO - Sending request for Gwyneth Paltrow to URL: https://en.wikipedia.org/wiki/Gwyneth_Paltrow_filmography
+2024-09-08 19:36:26,646 - INFO - Sending request for Gwyneth Paltrow to URL: https://en.wikipedia.org/wiki/List_of_Gwyneth_Paltrow_performances
+2024-09-08 19:36:26,948 - INFO - Successfully processed Gwyneth Paltrow
+2024-09-08 19:36:28,953 - INFO - Sending request for Tom Hiddleston to URL: https://en.wikipedia.org/wiki/Tom_Hiddleston
+2024-09-08 19:36:29,084 - INFO - Sending request for Tom Hiddleston to URL: https://en.wikipedia.org/wiki/Tom_Hiddleston_filmography
+2024-09-08 19:36:29,576 - INFO - Sending request for Tom Hiddleston to URL: https://en.wikipedia.org/wiki/List_of_Tom_Hiddleston_performances
+2024-09-08 19:36:29,647 - WARNING - No movies found for Tom Hiddleston
+2024-09-08 19:36:31,652 - INFO - Sending request for Hayley Atwell to URL: https://en.wikipedia.org/wiki/Hayley_Atwell
+2024-09-08 19:36:31,778 - INFO - Successfully processed Hayley Atwell
+2024-09-08 19:36:33,779 - INFO - Sending request for Paul Bettany to URL: https://en.wikipedia.org/wiki/Paul_Bettany
+2024-09-08 19:36:33,890 - INFO - Successfully processed Paul Bettany
+2024-09-08 19:36:35,895 - INFO - Sending request for Kat Dennings to URL: https://en.wikipedia.org/wiki/Kat_Dennings
+2024-09-08 19:36:35,980 - INFO - Successfully processed Kat Dennings
+2024-09-08 19:36:37,981 - INFO - Sending request for Clark Gregg to URL: https://en.wikipedia.org/wiki/Clark_Gregg
+2024-09-08 19:36:38,062 - INFO - Successfully processed Clark Gregg
+2024-09-08 19:36:40,067 - INFO - Sending request for Ming-Na Wen to URL: https://en.wikipedia.org/wiki/Ming-Na_Wen
+2024-09-08 19:36:40,174 - INFO - Successfully processed Ming-Na Wen
+2024-09-08 19:36:42,176 - INFO - Sending request for Benedict Wong to URL: https://en.wikipedia.org/wiki/Benedict_Wong
+2024-09-08 19:36:42,273 - INFO - Successfully processed Benedict Wong
+2024-09-08 19:36:44,276 - INFO - Sending request for Tilda Swinton to URL: https://en.wikipedia.org/wiki/Tilda_Swinton
+2024-09-08 19:36:44,413 - INFO - Sending request for Tilda Swinton to URL: https://en.wikipedia.org/wiki/Tilda_Swinton_filmography
+2024-09-08 19:36:44,461 - INFO - Successfully processed Tilda Swinton
+2024-09-08 19:36:46,466 - INFO - Sending request for Michael B. Jordan to URL: https://en.wikipedia.org/wiki/Michael_B._Jordan
+2024-09-08 19:36:46,631 - INFO - Successfully processed Michael B. Jordan
+2024-09-08 19:36:48,633 - INFO - Sending request for Florence Pugh to URL: https://en.wikipedia.org/wiki/Florence_Pugh
+2024-09-08 19:36:48,743 - INFO - Successfully processed Florence Pugh
+2024-09-08 19:36:50,748 - INFO - Sending request for Josh Brolin to URL: https://en.wikipedia.org/wiki/Josh_Brolin
+2024-09-08 19:36:50,843 - INFO - Sending request for Josh Brolin to URL: https://en.wikipedia.org/wiki/Josh_Brolin_filmography
+2024-09-08 19:36:50,890 - INFO - Successfully processed Josh Brolin
+2024-09-08 19:36:52,894 - INFO - Sending request for Marisa Tomei to URL: https://en.wikipedia.org/wiki/Marisa_Tomei
+2024-09-08 19:36:53,014 - INFO - Sending request for Marisa Tomei to URL: https://en.wikipedia.org/wiki/Marisa_Tomei_filmography
+2024-09-08 19:36:53,600 - INFO - Successfully processed Marisa Tomei
+2024-09-08 19:36:55,605 - INFO - Sending request for Idris Elba to URL: https://en.wikipedia.org/wiki/Idris_Elba
+2024-09-08 19:36:55,763 - INFO - Successfully processed Idris Elba
+2024-09-08 19:36:57,766 - INFO - Sending request for Gemma Chan to URL: https://en.wikipedia.org/wiki/Gemma_Chan
+2024-09-08 19:36:57,886 - INFO - Successfully processed Gemma Chan
+2024-09-08 19:36:59,890 - INFO - Sending request for Stan Lee to URL: https://en.wikipedia.org/wiki/Stan_Lee
+2024-09-08 19:37:00,276 - INFO - Successfully processed Stan Lee
+2024-09-08 19:37:02,281 - INFO - Sending request for Carrie Fisher to URL: https://en.wikipedia.org/wiki/Carrie_Fisher
+2024-09-08 19:37:02,453 - INFO - Successfully processed Carrie Fisher
+2024-09-08 19:37:04,458 - INFO - Sending request for Michael Clarke Duncan to URL: https://en.wikipedia.org/wiki/Michael_Clarke_Duncan
+2024-09-08 19:37:04,542 - INFO - Successfully processed Michael Clarke Duncan
+2024-09-08 19:37:06,547 - INFO - Sending request for Powers Boothe to URL: https://en.wikipedia.org/wiki/Powers_Boothe
+2024-09-08 19:37:06,619 - INFO - Successfully processed Powers Boothe
+2024-09-08 19:37:08,624 - INFO - Sending request for Bill Paxton to URL: https://en.wikipedia.org/wiki/Bill_Paxton
+2024-09-08 19:37:08,756 - INFO - Successfully processed Bill Paxton
+2024-09-08 19:37:10,757 - INFO - Sending request for Cate Blanchett to URL: https://en.wikipedia.org/wiki/Cate_Blanchett
+2024-09-08 19:37:11,141 - INFO - Sending request for Cate Blanchett to URL: https://en.wikipedia.org/wiki/Cate_Blanchett_filmography
+2024-09-08 19:37:12,361 - INFO - Sending request for Cate Blanchett to URL: https://en.wikipedia.org/wiki/List_of_Cate_Blanchett_performances
+2024-09-08 19:37:13,226 - WARNING - No movies found for Cate Blanchett
+2024-09-08 19:37:15,235 - INFO - Data successfully exported to actors_movies.csv
+2024-09-08 19:37:15,235 - INFO - Script finished
+2024-09-08 19:44:17,425 - INFO - Script started
+2024-09-08 19:44:17,425 - INFO - Sending request for Robert Downey Jr. to URL: https://en.wikipedia.org/wiki/Robert_Downey_Jr.
+2024-09-08 19:44:17,659 - INFO - Successfully processed Robert Downey Jr.
+2024-09-08 19:44:19,664 - INFO - Sending request for Scarlett Johansson to URL: https://en.wikipedia.org/wiki/Scarlett_Johansson
+2024-09-08 19:44:19,912 - INFO - Sending request for Scarlett Johansson to URL: https://en.wikipedia.org/wiki/Scarlett_Johansson_filmography
+2024-09-08 19:44:20,016 - INFO - Successfully processed Scarlett Johansson
+2024-09-08 19:44:22,018 - INFO - Sending request for Chris Evans to URL: https://en.wikipedia.org/wiki/Chris_Evans
+2024-09-08 19:44:22,056 - INFO - Sending request for Chris Evans to URL: https://en.wikipedia.org/wiki/Chris_Evans_filmography
+2024-09-08 19:44:22,134 - INFO - Successfully processed Chris Evans
+2024-09-08 19:44:24,140 - INFO - Sending request for Brie Larson to URL: https://en.wikipedia.org/wiki/Brie_Larson
+2024-09-08 19:44:24,352 - INFO - Sending request for Brie Larson to URL: https://en.wikipedia.org/wiki/Brie_Larson_filmography
+2024-09-08 19:44:24,434 - INFO - Successfully processed Brie Larson
+2024-09-08 19:44:26,438 - INFO - Sending request for Chadwick Boseman to URL: https://en.wikipedia.org/wiki/Chadwick_Boseman
+2024-09-08 19:44:26,663 - INFO - Successfully processed Chadwick Boseman
+2024-09-08 19:44:28,665 - INFO - Sending request for Elizabeth Olsen to URL: https://en.wikipedia.org/wiki/Elizabeth_Olsen
+2024-09-08 19:44:28,832 - INFO - Successfully processed Elizabeth Olsen
+2024-09-08 19:44:30,835 - INFO - Sending request for Chris Hemsworth to URL: https://en.wikipedia.org/wiki/Chris_Hemsworth
+2024-09-08 19:44:30,961 - INFO - Successfully processed Chris Hemsworth
+2024-09-08 19:44:32,963 - INFO - Sending request for Zoe Saldana to URL: https://en.wikipedia.org/wiki/Zoe_Saldana
+2024-09-08 19:44:33,119 - INFO - Successfully processed Zoe Saldana
+2024-09-08 19:44:35,120 - INFO - Sending request for Mark Ruffalo to URL: https://en.wikipedia.org/wiki/Mark_Ruffalo
+2024-09-08 19:44:35,260 - INFO - Sending request for Mark Ruffalo to URL: https://en.wikipedia.org/wiki/Mark_Ruffalo_filmography
+2024-09-08 19:44:35,318 - INFO - Successfully processed Mark Ruffalo
+2024-09-08 19:44:37,320 - INFO - Sending request for Natalie Portman to URL: https://en.wikipedia.org/wiki/Natalie_Portman
+2024-09-08 19:44:37,551 - INFO - Sending request for Natalie Portman to URL: https://en.wikipedia.org/wiki/Natalie_Portman_filmography
+2024-09-08 19:44:37,639 - INFO - Successfully processed Natalie Portman
+2024-09-08 19:44:39,644 - INFO - Sending request for Paul Rudd to URL: https://en.wikipedia.org/wiki/Paul_Rudd
+2024-09-08 19:44:39,732 - INFO - Sending request for Paul Rudd to URL: https://en.wikipedia.org/wiki/Paul_Rudd_filmography
+2024-09-08 19:44:39,851 - INFO - Successfully processed Paul Rudd
+2024-09-08 19:44:41,854 - INFO - Sending request for Evangeline Lilly to URL: https://en.wikipedia.org/wiki/Evangeline_Lilly
+2024-09-08 19:44:41,961 - INFO - Successfully processed Evangeline Lilly
+2024-09-08 19:44:43,966 - INFO - Sending request for Benedict Cumberbatch to URL: https://en.wikipedia.org/wiki/Benedict_Cumberbatch
+2024-09-08 19:44:44,162 - INFO - Sending request for Benedict Cumberbatch to URL: https://en.wikipedia.org/wiki/Benedict_Cumberbatch_filmography
+2024-09-08 19:44:44,297 - INFO - Successfully processed Benedict Cumberbatch
+2024-09-08 19:44:46,302 - INFO - Sending request for Tessa Thompson to URL: https://en.wikipedia.org/wiki/Tessa_Thompson
+2024-09-08 19:44:46,400 - INFO - Successfully processed Tessa Thompson
+2024-09-08 19:44:48,404 - INFO - Sending request for Tom Holland to URL: https://en.wikipedia.org/wiki/Tom_Holland
+2024-09-08 19:44:48,522 - INFO - Sending request for Tom Holland to URL: https://en.wikipedia.org/wiki/Tom_Holland_filmography
+2024-09-08 19:44:48,629 - INFO - Successfully processed Tom Holland
+2024-09-08 19:44:50,634 - INFO - Sending request for Zendaya to URL: https://en.wikipedia.org/wiki/Zendaya
+2024-09-08 19:44:50,802 - INFO - Successfully processed Zendaya
+2024-09-08 19:44:52,807 - INFO - Sending request for Chris Pratt to URL: https://en.wikipedia.org/wiki/Chris_Pratt
+2024-09-08 19:44:52,969 - INFO - Successfully processed Chris Pratt
+2024-09-08 19:44:54,973 - INFO - Sending request for Karen Gillan to URL: https://en.wikipedia.org/wiki/Karen_Gillan
+2024-09-08 19:44:55,087 - INFO - Successfully processed Karen Gillan
+2024-09-08 19:44:57,091 - INFO - Sending request for Dave Bautista to URL: https://en.wikipedia.org/wiki/Dave_Bautista
+2024-09-08 19:44:57,292 - INFO - Successfully processed Dave Bautista
+2024-09-08 19:44:59,297 - INFO - Sending request for Pom Klementieff to URL: https://en.wikipedia.org/wiki/Pom_Klementieff
+2024-09-08 19:44:59,413 - INFO - Successfully processed Pom Klementieff
+2024-09-08 19:45:01,418 - INFO - Sending request for Samuel L. Jackson to URL: https://en.wikipedia.org/wiki/Samuel_L._Jackson
+2024-09-08 19:45:01,597 - INFO - Sending request for Samuel L. Jackson to URL: https://en.wikipedia.org/wiki/Samuel_L._Jackson_filmography
+2024-09-08 19:45:01,768 - INFO - Successfully processed Samuel L. Jackson
+2024-09-08 19:45:03,773 - INFO - Sending request for Cobie Smulders to URL: https://en.wikipedia.org/wiki/Cobie_Smulders
+2024-09-08 19:45:03,858 - INFO - Successfully processed Cobie Smulders
+2024-09-08 19:45:05,864 - INFO - Sending request for Jeremy Renner to URL: https://en.wikipedia.org/wiki/Jeremy_Renner
+2024-09-08 19:45:05,979 - INFO - Successfully processed Jeremy Renner
+2024-09-08 19:45:07,984 - INFO - Sending request for Danai Gurira to URL: https://en.wikipedia.org/wiki/Danai_Gurira
+2024-09-08 19:45:08,089 - INFO - Successfully processed Danai Gurira
+2024-09-08 19:45:10,094 - INFO - Sending request for Sebastian Stan to URL: https://en.wikipedia.org/wiki/Sebastian_Stan
+2024-09-08 19:45:10,217 - INFO - Successfully processed Sebastian Stan
+2024-09-08 19:45:12,223 - INFO - Sending request for Letitia Wright to URL: https://en.wikipedia.org/wiki/Letitia_Wright
+2024-09-08 19:45:12,311 - INFO - Successfully processed Letitia Wright
+2024-09-08 19:45:14,314 - INFO - Sending request for Anthony Mackie to URL: https://en.wikipedia.org/wiki/Anthony_Mackie
+2024-09-08 19:45:14,406 - INFO - Successfully processed Anthony Mackie
+2024-09-08 19:45:16,412 - INFO - Sending request for Lupita Nyong'o to URL: https://en.wikipedia.org/wiki/Lupita_Nyong%27o
+2024-09-08 19:45:16,623 - INFO - Successfully processed Lupita Nyong'o
+2024-09-08 19:45:18,628 - INFO - Sending request for Don Cheadle to URL: https://en.wikipedia.org/wiki/Don_Cheadle
+2024-09-08 19:45:18,741 - INFO - Sending request for Don Cheadle to URL: https://en.wikipedia.org/wiki/Don_Cheadle_filmography
+2024-09-08 19:45:18,759 - INFO - Sending request for Don Cheadle to URL: https://en.wikipedia.org/wiki/List_of_Don_Cheadle_performances
+2024-09-08 19:45:18,825 - INFO - Successfully processed Don Cheadle
+2024-09-08 19:45:20,830 - INFO - Sending request for Gwyneth Paltrow to URL: https://en.wikipedia.org/wiki/Gwyneth_Paltrow
+2024-09-08 19:45:21,044 - INFO - Sending request for Gwyneth Paltrow to URL: https://en.wikipedia.org/wiki/Gwyneth_Paltrow_filmography
+2024-09-08 19:45:21,061 - INFO - Sending request for Gwyneth Paltrow to URL: https://en.wikipedia.org/wiki/List_of_Gwyneth_Paltrow_performances
+2024-09-08 19:45:21,123 - INFO - Successfully processed Gwyneth Paltrow
+2024-09-08 19:45:23,129 - INFO - Sending request for Tom Hiddleston to URL: https://en.wikipedia.org/wiki/Tom_Hiddleston
+2024-09-08 19:45:23,252 - INFO - Sending request for Tom Hiddleston to URL: https://en.wikipedia.org/wiki/Tom_Hiddleston_filmography
+2024-09-08 19:45:23,268 - INFO - Sending request for Tom Hiddleston to URL: https://en.wikipedia.org/wiki/List_of_Tom_Hiddleston_performances
+2024-09-08 19:45:23,360 - INFO - Successfully processed Tom Hiddleston
+2024-09-08 19:45:25,365 - INFO - Sending request for Hayley Atwell to URL: https://en.wikipedia.org/wiki/Hayley_Atwell
+2024-09-08 19:45:25,462 - INFO - Successfully processed Hayley Atwell
+2024-09-08 19:45:27,467 - INFO - Sending request for Paul Bettany to URL: https://en.wikipedia.org/wiki/Paul_Bettany
+2024-09-08 19:45:27,568 - INFO - Successfully processed Paul Bettany
+2024-09-08 19:45:29,570 - INFO - Sending request for Kat Dennings to URL: https://en.wikipedia.org/wiki/Kat_Dennings
+2024-09-08 19:45:29,653 - INFO - Successfully processed Kat Dennings
+2024-09-08 19:45:31,658 - INFO - Sending request for Clark Gregg to URL: https://en.wikipedia.org/wiki/Clark_Gregg
+2024-09-08 19:45:31,729 - INFO - Successfully processed Clark Gregg
+2024-09-08 19:45:33,734 - INFO - Sending request for Ming-Na Wen to URL: https://en.wikipedia.org/wiki/Ming-Na_Wen
+2024-09-08 19:45:33,868 - INFO - Successfully processed Ming-Na Wen
+2024-09-08 19:45:35,873 - INFO - Sending request for Benedict Wong to URL: https://en.wikipedia.org/wiki/Benedict_Wong
+2024-09-08 19:45:35,945 - INFO - Successfully processed Benedict Wong
+2024-09-08 19:45:37,950 - INFO - Sending request for Tilda Swinton to URL: https://en.wikipedia.org/wiki/Tilda_Swinton
+2024-09-08 19:45:38,087 - INFO - Sending request for Tilda Swinton to URL: https://en.wikipedia.org/wiki/Tilda_Swinton_filmography
+2024-09-08 19:45:38,138 - INFO - Successfully processed Tilda Swinton
+2024-09-08 19:45:40,144 - INFO - Sending request for Michael B. Jordan to URL: https://en.wikipedia.org/wiki/Michael_B._Jordan
+2024-09-08 19:45:40,311 - INFO - Successfully processed Michael B. Jordan
+2024-09-08 19:45:42,312 - INFO - Sending request for Florence Pugh to URL: https://en.wikipedia.org/wiki/Florence_Pugh
+2024-09-08 19:45:42,412 - INFO - Successfully processed Florence Pugh
+2024-09-08 19:45:44,418 - INFO - Sending request for Josh Brolin to URL: https://en.wikipedia.org/wiki/Josh_Brolin
+2024-09-08 19:45:44,502 - INFO - Sending request for Josh Brolin to URL: https://en.wikipedia.org/wiki/Josh_Brolin_filmography
+2024-09-08 19:45:44,547 - INFO - Successfully processed Josh Brolin
+2024-09-08 19:45:46,552 - INFO - Sending request for Marisa Tomei to URL: https://en.wikipedia.org/wiki/Marisa_Tomei
+2024-09-08 19:45:46,683 - INFO - Sending request for Marisa Tomei to URL: https://en.wikipedia.org/wiki/Marisa_Tomei_filmography
+2024-09-08 19:45:46,737 - INFO - Successfully processed Marisa Tomei
+2024-09-08 19:45:48,739 - INFO - Sending request for Idris Elba to URL: https://en.wikipedia.org/wiki/Idris_Elba
+2024-09-08 19:45:48,891 - INFO - Successfully processed Idris Elba
+2024-09-08 19:45:50,892 - INFO - Sending request for Gemma Chan to URL: https://en.wikipedia.org/wiki/Gemma_Chan
+2024-09-08 19:45:51,029 - INFO - Successfully processed Gemma Chan
+2024-09-08 19:45:53,033 - INFO - Sending request for Stan Lee to URL: https://en.wikipedia.org/wiki/Stan_Lee
+2024-09-08 19:45:53,359 - INFO - Successfully processed Stan Lee
+2024-09-08 19:45:55,361 - INFO - Sending request for Carrie Fisher to URL: https://en.wikipedia.org/wiki/Carrie_Fisher
+2024-09-08 19:45:55,511 - INFO - Successfully processed Carrie Fisher
+2024-09-08 19:45:57,515 - INFO - Sending request for Michael Clarke Duncan to URL: https://en.wikipedia.org/wiki/Michael_Clarke_Duncan
+2024-09-08 19:45:57,599 - INFO - Successfully processed Michael Clarke Duncan
+2024-09-08 19:45:59,603 - INFO - Sending request for Powers Boothe to URL: https://en.wikipedia.org/wiki/Powers_Boothe
+2024-09-08 19:45:59,712 - INFO - Successfully processed Powers Boothe
+2024-09-08 19:46:01,715 - INFO - Sending request for Bill Paxton to URL: https://en.wikipedia.org/wiki/Bill_Paxton
+2024-09-08 19:46:01,833 - INFO - Successfully processed Bill Paxton
+2024-09-08 19:46:03,839 - INFO - Sending request for Cate Blanchett to URL: https://en.wikipedia.org/wiki/Cate_Blanchett
+2024-09-08 19:46:04,221 - INFO - Sending request for Cate Blanchett to URL: https://en.wikipedia.org/wiki/Cate_Blanchett_filmography
+2024-09-08 19:46:04,323 - INFO - Successfully processed Cate Blanchett
+2024-09-08 19:46:06,330 - INFO - Data successfully exported to actors_movies.csv
+2024-09-08 19:46:06,330 - INFO - Script finished
