@@ -82,36 +82,16 @@
             position: relative;
             display: inline-block;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0,0,0);
-            background-color: rgba(0,0,0,0.4);
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
+        #addActorBtn {
+            background-color: #008CBA;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
             text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
             cursor: pointer;
         }
     </style>
@@ -129,7 +109,6 @@
         <button id="search-button">Search</button>
     </div>
     <div id="results"></div>
-
 
     <script>
         const searchInput = document.getElementById('search-input');
@@ -225,7 +204,15 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    displayResults(data, type);
+                    if (type === 'actor' && data === null) {
+                        resultsContainer.innerHTML = `
+                            <p>No results found for actor: ${query}</p>
+                            <button id="addActorBtn">Add this actor from TMDB</button>
+                        `;
+                        document.getElementById('addActorBtn').onclick = () => addActorFromTMDB(query);
+                    } else {
+                        displayResults(data, type);
+                    }
                 } else {
                     resultsContainer.innerHTML = `Error: ${data.detail || 'Something went wrong'}`;
                 }
@@ -273,6 +260,33 @@
                     `;
                     resultsContainer.appendChild(movieItem);
                 });
+            }
+        }
+
+        async function addActorFromTMDB(actorName) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/add_actor_from_tmdb/${encodeURIComponent(actorName)}`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    resultsContainer.innerHTML = `
+                        <p>${result.message}</p>
+                        <div class="result-item">
+                            <h3>${result.data.name}</h3>
+                            <p>Date of Birth: ${result.data.date_of_birth || 'Unknown'}</p>
+                            <p>Gender: ${result.data.gender || 'Unknown'}</p>
+                            <p>Number of movies: ${result.data.movies_count}</p>
+                        </div>
+                        <button onclick="performSearch()">Refresh Search</button>
+                    `;
+                } else {
+                    resultsContainer.innerHTML = `Error: ${result.detail || 'Something went wrong'}`;
+                }
+            } catch (error) {
+                resultsContainer.innerHTML = `Error: ${error.message}`;
             }
         }
     </script>
