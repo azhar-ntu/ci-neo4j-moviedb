@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Database Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        #search-input {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #search-type {
+            padding: 10px;
+            font-size: 16px;
+        }
+        #search-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #search-button:hover {
+            background-color: #45a049;
+        }
+        #results {
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .result-item {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .result-item h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .result-item p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Movie Database Search</h1>
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Enter actor or movie name">
+        <select id="search-type">
+            <option value="actor">Actor</option>
+            <option value="movie">Movie</option>
+        </select>
+        <button id="search-button">Search</button>
+    </div>
+    <div id="results"></div>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const searchType = document.getElementById('search-type');
+        const searchButton = document.getElementById('search-button');
+        const resultsContainer = document.getElementById('results');
+
+        const API_BASE_URL = 'http://localhost:8000';  // Update this if your API is hosted elsewhere
+
+        searchButton.addEventListener('click', performSearch);
+
+        async function performSearch() {
+            const query = searchInput.value.trim();
+            const type = searchType.value;
+
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            resultsContainer.innerHTML = 'Searching...';
+
+            try {
+                let url;
+                if (type === 'actor') {
+                    url = `${API_BASE_URL}/actors/${encodeURIComponent(query)}/filmography`;
+                } else {
+                    url = `${API_BASE_URL}/search/movies?query=${encodeURIComponent(query)}`;
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayResults(data, type);
+                } else {
+                    resultsContainer.innerHTML = `Error: ${data.detail || 'Something went wrong'}`;
+                }
+            } catch (error) {
+                resultsContainer.innerHTML = `Error: ${error.message}`;
+            }
+        }
+
+        function displayResults(data, type) {
+            resultsContainer.innerHTML = '';
+
+            if (type === 'actor') {
+                const actorInfo = document.createElement('div');
+                actorInfo.className = 'result-item';
+                actorInfo.innerHTML = `
+                    <h3>${data.actor.name}</h3>
+                    <p>Date of Birth: ${data.actor.date_of_birth || 'Unknown'}</p>
+                    <p>Gender: ${data.actor.gender || 'Unknown'}</p>
+                `;
+                resultsContainer.appendChild(actorInfo);
+
+                const moviesList = document.createElement('div');
+                moviesList.innerHTML = '<h3>Filmography:</h3>';
+                data.movies.forEach(movie => {
+                    const movieItem = document.createElement('div');
+                    movieItem.className = 'result-item';
+                    movieItem.innerHTML = `
+                        <p><strong>${movie.title}</strong> (${movie.year})</p>
+                    `;
+                    moviesList.appendChild(movieItem);
+                });
+                resultsContainer.appendChild(moviesList);
+            } else {
+                if (data.length === 0) {
+                    resultsContainer.innerHTML = 'No movies found.';
+                    return;
+                }
+
+                data.forEach(movie => {
+                    const movieItem = document.createElement('div');
+                    movieItem.className = 'result-item';
+                    movieItem.innerHTML = `
+                        <h3>${movie.title}</h3>
+                        <p>Year: ${movie.year}</p>
+                    `;
+                    resultsContainer.appendChild(movieItem);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

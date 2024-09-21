@@ -1,4 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from py2neo import Graph, Node, Relationship, NodeMatcher
 from typing import Optional, List
@@ -7,6 +10,14 @@ import requests
 import re
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 # Neo4j connection setup
 NEO4J_URI = "bolt://localhost:7687"  # Update this with your Neo4j URI
@@ -25,6 +36,13 @@ TMDB_BASE_URL = "https://api.themoviedb.org/3"
 logging.basicConfig(filename='api_log.txt', level=logging.INFO, 
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Load HTML content
+with open("index.html", "r") as file:
+    html_content = file.read()
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root():
+    return html_content
 class Actor(BaseModel):
     name: str
     date_of_birth: Optional[str] = None
