@@ -55,12 +55,73 @@
         .result-item p {
             margin: 5px 0;
         }
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+        }
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #fff; 
+            border-bottom: 1px solid #d4d4d4; 
+        }
+        .autocomplete-items div:hover {
+            background-color: #e9e9e9; 
+        }
+        .autocomplete-active {
+            background-color: DodgerBlue !important; 
+            color: #ffffff; 
+        }
+        .autocomplete {
+            position: relative;
+            display: inline-block;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <h1>Movie Database Search</h1>
     <div class="search-container">
-        <input type="text" id="search-input" placeholder="Enter actor or movie name">
+        <div class="autocomplete" style="width:300px;">
+            <input type="text" id="search-input" placeholder="Enter actor or movie name">
+        </div>
         <select id="search-type">
             <option value="actor">Actor</option>
             <option value="movie">Movie</option>
@@ -69,15 +130,77 @@
     </div>
     <div id="results"></div>
 
+
     <script>
         const searchInput = document.getElementById('search-input');
         const searchType = document.getElementById('search-type');
         const searchButton = document.getElementById('search-button');
         const resultsContainer = document.getElementById('results');
 
-        const API_BASE_URL = 'http://localhost:8000';  // Update this if your API is hosted elsewhere
+        const API_BASE_URL = '';  // Empty string for relative URLs
 
         searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('input', debounce(handleAutocomplete, 300));
+
+        function debounce(func, delay) {
+            let debounceTimer;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => func.apply(context, args), delay);
+            }
+        }
+
+        async function handleAutocomplete() {
+            const query = searchInput.value.trim();
+            const type = searchType.value;
+
+            if (query.length < 2) {
+                closeAllLists();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/autocomplete/${type}?query=${encodeURIComponent(query)}`);
+                const suggestions = await response.json();
+                
+                let autocompleteList = document.getElementById(searchInput.id + "autocomplete-list");
+                if (!autocompleteList) {
+                    autocompleteList = document.createElement("DIV");
+                    autocompleteList.setAttribute("id", searchInput.id + "autocomplete-list");
+                    autocompleteList.setAttribute("class", "autocomplete-items");
+                    searchInput.parentNode.appendChild(autocompleteList);
+                }
+                
+                autocompleteList.innerHTML = '';
+                for (let i = 0; i < suggestions.length; i++) {
+                    const suggestionElement = document.createElement("DIV");
+                    suggestionElement.innerHTML = suggestions[i];
+                    suggestionElement.addEventListener("click", function(e) {
+                        searchInput.value = this.innerText;
+                        closeAllLists();
+                    });
+                    autocompleteList.appendChild(suggestionElement);
+                }
+            } catch (error) {
+                console.error('Error fetching autocomplete suggestions:', error);
+            }
+        }
+
+        function closeAllLists(elmnt) {
+            var x = document.getElementsByClassName("autocomplete-items");
+            for (var i = 0; i < x.length; i++) {
+                if (elmnt != x[i] && elmnt != searchInput) {
+                    x[i].parentNode.removeChild(x[i]);
+                }
+            }
+        }
+
+        document.addEventListener("click", function (e) {
+            closeAllLists(e.target);
+        });
+
 
         async function performSearch() {
             const query = searchInput.value.trim();

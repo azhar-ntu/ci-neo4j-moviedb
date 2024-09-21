@@ -37,8 +37,31 @@ logging.basicConfig(filename='api_log.txt', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Load HTML content
-with open("index.html", "r") as file:
-    html_content = file.read()
+# Update the HTML content loading to use a function
+def get_html_content():
+    with open("index.html", "r") as file:
+        return file.read()
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root():
+    return get_html_content()
+    
+@app.get("/autocomplete/{search_type}")
+async def autocomplete(search_type: str, query: str = Query(..., min_length=1)):
+    if search_type not in ['actor', 'movie']:
+        raise HTTPException(status_code=400, detail="Invalid search type")
+    
+    cypher_query = """
+    MATCH (n:{label})
+    WHERE n.name =~ $regex
+    RETURN n.name AS name
+    LIMIT 5
+    """.format(label='Actor' if search_type == 'actor' else 'Movie')
+    
+    regex = f"(?i).*{re.escape(query)}.*"
+    results = graph.run(cypher_query, regex=regex).data()
+    
+    return [result['name'] for result in results]
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
@@ -60,6 +83,11 @@ class ActorInMovie(BaseModel):
 class ActorFilmography(BaseModel):
     actor: Actor
     movies: List[Movie]
+
+class ActorCreate(BaseModel):
+    name: str
+    date_of_birth: Optional[str] = None
+    gender: Optional[str] = None
 # Actor CRUD operations
 @app.post("/actors", response_model=Actor)
 async def create_actor(actor: Actor):
@@ -233,12 +261,21 @@ async def add_actor_from_tmdb(actor_name: str):
         actor_data = fetch_actor_from_tmdb(actor_name)
         if actor_data:
             added_actor = add_actor_to_neo4j(actor_data)
-            return {"message": f"Actor {actor_name} added successfully with filmography", "data": added_actor}
+            return {
+                "message": f"Actor {actor_name} added successfully with filmography",
+                "data": {
+                    "name": added_actor['name'],
+                    "date_of_birth": added_actor['date_of_birth'],
+                    "gender": added_actor['gender'],
+                    "movies_count": len(added_actor['filmography'])
+                }
+            }
         else:
             raise HTTPException(status_code=404, detail=f"Actor {actor_name} not found in TMDB")
     except Exception as e:
         logging.error(f"Error adding actor from TMDB: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    
 @app.get("/actors/{name}/filmography", response_model=ActorFilmography)
 async def get_actor_filmography(name: str):
     cypher_query = """
@@ -249,6 +286,35 @@ async def get_actor_filmography(name: str):
     
     if not result:
         raise HTTPException(status_code=404, detail="Actor not found or has no movies")
+    
+    actor_data = result[0]['actor']
+    movies_data = result[0]['movies']
+    
+    return ActorFilmography(
+        actor=Actor(**dict(actor_data)),
+        movies=[Movie(**dict(movie)) for movie in movies_data]
+    )
+@app.post("/actors/add")
+async def add_actor(actor: ActorCreate):
+    try:
+        actor_node = Node("Actor", **actor.dict())
+        graph.create(actor_node)
+        logging.info(f"Actor added: {actor.name}")
+        return {"message": f"Actor {actor.name} added successfully"}
+    except Exception as e:
+        logging.error(f"Error adding actor: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/actors/{name}/filmography", response_model=Optional[ActorFilmography])
+async def get_actor_filmography(name: str):
+    cypher_query = """
+    MATCH (a:Actor {name: $name})-[:ACTED_IN]->(m:Movie)
+    RETURN a AS actor, collect(m) AS movies
+    """
+    result = graph.run(cypher_query, name=name).data()
+    
+    if not result:
+        return None
     
     actor_data = result[0]['actor']
     movies_data = result[0]['movies']
