@@ -39,6 +39,9 @@ class ActorInMovie(BaseModel):
     actor_name: str
     movie_title: str
 
+class ActorFilmography(BaseModel):
+    actor: Actor
+    movies: List[Movie]
 # Actor CRUD operations
 @app.post("/actors", response_model=Actor)
 async def create_actor(actor: Actor):
