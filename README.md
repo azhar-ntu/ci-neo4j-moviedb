@@ -52,6 +52,8 @@ Before you begin, ensure you have the following installed:
 - `GET /actors`: Retrieve a list of all actors
 - `PUT /actors/{name}`: Update information for a specific actor
 - `DELETE /actors/{name}`: Delete a specific actor
+- `GET /search/actors`: Search for actors by name
+- `GET /actors/{name}/filmography`: Retrieve the filmography of a specific actor
 
 ### Movies
 
@@ -60,6 +62,7 @@ Before you begin, ensure you have the following installed:
 - `GET /movies`: Retrieve a list of all movies
 - `PUT /movies/{title}`: Update information for a specific movie
 - `DELETE /movies/{title}`: Delete a specific movie
+- `GET /search/movies`: Search for movies by title
 
 ### Relationships
 
@@ -67,7 +70,7 @@ Before you begin, ensure you have the following installed:
 
 ### TMDB Integration
 
-- `POST /add_actor_from_tmdb/{actor_name}`: Fetch actor data from TMDB and add it to the database
+- `POST /add_actor_from_tmdb/{actor_name}`: Fetch actor data from TMDB, including their filmography, and add it to the database
 
 ## Usage Examples
 
@@ -96,6 +99,48 @@ Here are some example curl commands to interact with the API:
      -H 'accept: application/json'
    ```
 
+4. Search for actors:
+   ```
+   curl -X 'GET' \
+     'http://localhost:8000/search/actors?query=Tom' \
+     -H 'accept: application/json'
+   ```
+
+5. Search for movies:
+   ```
+   curl -X 'GET' \
+     'http://localhost:8000/search/movies?query=Forrest' \
+     -H 'accept: application/json'
+   ```
+
+6. Get an actor's filmography:
+   ```
+   curl -X 'GET' \
+     'http://localhost:8000/actors/Brad%20Pitt/filmography' \
+     -H 'accept: application/json'
+   ```
+
+## API Behavior
+
+When adding an actor from TMDB using the `/add_actor_from_tmdb/{actor_name}` endpoint:
+
+1. The API fetches the actor's basic information (name, date of birth, gender, date of death) from TMDB.
+2. It also retrieves the actor's filmography (movies they've acted in) from TMDB.
+3. The actor's information is added to the Neo4j database as an Actor node.
+4. Each movie in the actor's filmography is added as a Movie node (if it doesn't already exist).
+5. Relationships (ACTED_IN) are created between the Actor node and each Movie node.
+
+This allows you to quickly populate your database with an actor and their complete filmography in a single API call.
+
+When retrieving an actor's filmography using the `/actors/{name}/filmography` endpoint:
+
+1. The API searches for the actor in the Neo4j database.
+2. If found, it retrieves all the movies the actor has acted in (connected by the ACTED_IN relationship).
+3. The response includes the actor's information and a list of their movies.
+4. If the actor is not found or has no movies, a 404 error is returned.
+
+This endpoint allows you to quickly retrieve an actor's complete filmography as stored in your Neo4j database, without needing to make additional API calls to TMDB.
+
 ## Error Handling
 
 The API uses standard HTTP status codes to indicate the success or failure of requests. In case of errors, a JSON response will be returned with an error message.
@@ -103,17 +148,3 @@ The API uses standard HTTP status codes to indicate the success or failure of re
 ## Logging
 
 The API logs important events to a file named `api_log.txt`. Check this file for debugging information and to monitor API activity.
-
-## Security Considerations
-
-- This API doesn't include authentication. In a production environment, you should implement proper authentication and authorization.
-- Be cautious with the TMDB API key. Don't expose it in client-side code or public repositories.
-- Consider implementing rate limiting to prevent abuse of the API, especially for endpoints that interact with external services like TMDB.
-
-## Contributing
-
-Feel free to fork this project and submit pull requests with any enhancements.
-
-## License
-
-[Specify your license here]

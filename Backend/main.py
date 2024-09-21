@@ -1,9 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 from py2neo import Graph, Node, Relationship, NodeMatcher
 from typing import Optional, List
 import logging
 import requests
+import re
 
 app = FastAPI()
 
@@ -159,24 +160,50 @@ def fetch_actor_from_tmdb(actor_name):
         actor_data = data["results"][0]
         actor_id = actor_data["id"]
 
-        # Fetch detailed actor info
+        # Fetch detailed actor info including movie credits
         details_url = f"{TMDB_BASE_URL}/person/{actor_id}"
-        params = {"api_key": TMDB_API_KEY}
+        params = {
+            "api_key": TMDB_API_KEY,
+            "append_to_response": "movie_credits"
+        }
         response = requests.get(details_url, params=params)
         actor_details = response.json()
+
+        # Extract filmography
+        filmography = []
+        for movie in actor_details.get('movie_credits', {}).get('cast', []):
+            if movie.get('release_date'):
+                year = movie['release_date'][:4]
+                filmography.append({
+                    "title": movie['title'],
+                    "year": year
+                })
 
         return {
             "name": actor_details["name"],
             "date_of_birth": actor_details.get("birthday"),
             "gender": "Male" if actor_details["gender"] == 2 else "Female",
-            "date_of_death": actor_details.get("deathday")
+            "date_of_death": actor_details.get("deathday"),
+            "filmography": filmography
         }
     return None
 
 def add_actor_to_neo4j(actor_data):
-    actor_node = Node("Actor", **actor_data)
+    actor_node = Node("Actor", 
+                      name=actor_data['name'],
+                      date_of_birth=actor_data['date_of_birth'],
+                      gender=actor_data['gender'],
+                      date_of_death=actor_data['date_of_death'])
     graph.merge(actor_node, "Actor", "name")
-    logging.info(f"Actor added to Neo4j: {actor_data['name']}")
+
+    for movie in actor_data['filmography']:
+        movie_node = Node("Movie", title=movie['title'], year=movie['year'])
+        graph.merge(movie_node, "Movie", "title")
+        
+        acted_in = Relationship(actor_node, "ACTED_IN", movie_node)
+        graph.merge(acted_in)
+
+    logging.info(f"Actor added to Neo4j with filmography: {actor_data['name']}")
     return actor_data
 
 @app.post("/add_actor_from_tmdb/{actor_name}")
@@ -185,12 +212,53 @@ async def add_actor_from_tmdb(actor_name: str):
         actor_data = fetch_actor_from_tmdb(actor_name)
         if actor_data:
             added_actor = add_actor_to_neo4j(actor_data)
-            return {"message": f"Actor {actor_name} added successfully", "data": added_actor}
+            return {"message": f"Actor {actor_name} added successfully with filmography", "data": added_actor}
         else:
             raise HTTPException(status_code=404, detail=f"Actor {actor_name} not found in TMDB")
     except Exception as e:
         logging.error(f"Error adding actor from TMDB: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+@app.get("/actors/{name}/filmography", response_model=ActorFilmography)
+async def get_actor_filmography(name: str):
+    cypher_query = """
+    MATCH (a:Actor {name: $name})-[:ACTED_IN]->(m:Movie)
+    RETURN a AS actor, collect(m) AS movies
+    """
+    result = graph.run(cypher_query, name=name).data()
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="Actor not found or has no movies")
+    
+    actor_data = result[0]['actor']
+    movies_data = result[0]['movies']
+    
+    return ActorFilmography(
+        actor=Actor(**dict(actor_data)),
+        movies=[Movie(**dict(movie)) for movie in movies_data]
+    )
+
+# Search endpoints
+@app.get("/search/actors", response_model=List[Actor])
+async def search_actors(query: str = Query(..., min_length=1)):
+    cypher_query = """
+    MATCH (a:Actor)
+    WHERE a.name =~ $regex
+    RETURN a
+    """
+    regex = f"(?i).*{re.escape(query)}.*"
+    results = graph.run(cypher_query, regex=regex).data()
+    return [Actor(**dict(result['a'])) for result in results]
+
+@app.get("/search/movies", response_model=List[Movie])
+async def search_movies(query: str = Query(..., min_length=1)):
+    cypher_query = """
+    MATCH (m:Movie)
+    WHERE m.title =~ $regex
+    RETURN m
+    """
+    regex = f"(?i).*{re.escape(query)}.*"
+    results = graph.run(cypher_query, regex=regex).data()
+    return [Movie(**dict(result['m'])) for result in results]
 
 if __name__ == "__main__":
     import uvicorn
