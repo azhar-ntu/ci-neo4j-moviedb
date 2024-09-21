@@ -276,7 +276,7 @@ async def add_actor_from_tmdb(actor_name: str):
         logging.error(f"Error adding actor from TMDB: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/actors/{name}/filmography", response_model=ActorFilmography)
+@app.get("/actors/{name}/filmography", response_model=Optional[ActorFilmography])
 async def get_actor_filmography(name: str):
     cypher_query = """
     MATCH (a:Actor {name: $name})-[:ACTED_IN]->(m:Movie)
@@ -285,7 +285,7 @@ async def get_actor_filmography(name: str):
     result = graph.run(cypher_query, name=name).data()
     
     if not result:
-        raise HTTPException(status_code=404, detail="Actor not found or has no movies")
+        return None
     
     actor_data = result[0]['actor']
     movies_data = result[0]['movies']

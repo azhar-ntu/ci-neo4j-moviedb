@@ -286,6 +286,7 @@
                     resultsContainer.innerHTML = `Error: ${result.detail || 'Something went wrong'}`;
                 }
             } catch (error) {
+                console.error('Add actor error:', error);
                 resultsContainer.innerHTML = `Error: ${error.message}`;
             }
         }
