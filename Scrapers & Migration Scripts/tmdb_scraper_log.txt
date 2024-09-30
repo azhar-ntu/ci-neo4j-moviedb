@@ -9,3 +9,7 @@
 2024-09-08 20:00:57,970 - INFO - Script started
 2024-09-08 20:01:37,852 - INFO - Data successfully exported to actors_movies_tmdb.csv
 2024-09-08 20:01:37,852 - INFO - Script finished
+2024-09-23 10:42:13,616 - INFO - Script started
+2024-09-23 10:42:55,050 - INFO - Data successfully exported to actors_movies_tmdb2.csv
+2024-09-23 10:43:08,221 - INFO - Data successfully exported to Neo4j
+2024-09-23 10:43:08,222 - INFO - Script finished

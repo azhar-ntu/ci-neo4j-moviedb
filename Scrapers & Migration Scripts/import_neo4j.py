@@ -9,7 +9,7 @@ logging.basicConfig(filename='neo4j_import_log.txt', level=logging.INFO,
 # Neo4j connection setup
 NEO4J_URI = "bolt://localhost:7687"  # Update this with your Neo4j URI
 NEO4J_USER = "neo4j"  # Update this with your Neo4j username
-NEO4J_PASSWORD = "password"  # Update this with your Neo4j password
+NEO4J_PASSWORD = "12345678"  # Update this with your Neo4j password
 
 # Connect to Neo4j
 graph = Graph(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))

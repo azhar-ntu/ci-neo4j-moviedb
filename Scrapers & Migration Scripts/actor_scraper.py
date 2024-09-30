@@ -10,13 +10,13 @@ logging.basicConfig(filename='tmdb_scraper_log.txt', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 # TMDb API setup
-TMDB_API_KEY = "YOUR_TMDB_API_KEY_HERE"  # Replace with your actual TMDb API key
+TMDB_API_KEY = "5050d8fbe80ae587b7b26c894ea8ecb2"  # Replace with your actual TMDb API key
 TMDB_BASE_URL = "https://api.themoviedb.org/3"
 
 # Neo4j connection setup
 NEO4J_URI = "bolt://localhost:7687"  # Update this with your Neo4j URI
 NEO4J_USER = "neo4j"  # Update this with your Neo4j username
-NEO4J_PASSWORD = "password"  # Update this with your Neo4j password
+NEO4J_PASSWORD = "12345678"  # Update this with your Neo4j password
 
 graph = Graph(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
 
@@ -149,7 +149,7 @@ def process_actors_from_file(input_file):
 
 # Main execution
 input_file = 'actors.txt'
-output_file = 'actors_movies_tmdb.csv'
+output_file = 'actors_movies_tmdb2.csv'
 
 logging.info("Script started")
 all_actor_data = process_actors_from_file(input_file)
