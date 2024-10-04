@@ -65,7 +65,7 @@ async def autocomplete(search_type: str, query: str = Query(..., min_length=1)):
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
-    return html_content
+    return get_html_content()
 class Actor(BaseModel):
     name: str
     date_of_birth: Optional[str] = None
