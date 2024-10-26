@@ -13,7 +13,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Allow only the Next.js frontend
+    allow_origins=["*"],  # Allows all origins
     allow_credentials=True,
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
@@ -347,6 +347,84 @@ async def search_movies(query: str = Query(..., min_length=1)):
     results = graph.run(cypher_query, regex=regex).data()
     return [Movie(**dict(result['m'])) for result in results]
 
+@app.get("/movies/{title}/cast")
+async def get_movie_cast(title: str):
+    cypher_query = """
+    MATCH (m:Movie {title: $title})
+    OPTIONAL MATCH (a:Actor)-[:ACTED_IN]->(m)
+    WITH m as movie, collect(a) as unsorted_actors
+    WITH movie, [actor in unsorted_actors | actor {.*}] as actors_data
+    RETURN movie, apoc.coll.sort(actors_data, '^.name') as actors
+    """
+    
+    # If you don't have APOC installed, use this simpler query instead:
+    alternative_query = """
+    MATCH (m:Movie {title: $title})
+    OPTIONAL MATCH (a:Actor)-[:ACTED_IN]->(m)
+    WITH m as movie, a
+    ORDER BY a.name
+    WITH movie, collect(a) as actors
+    RETURN movie, actors
+    """
+    
+    try:
+        # Try with APOC first
+        result = graph.run(cypher_query, title=title).data()
+    except Exception:
+        # Fall back to alternative query if APOC is not available
+        result = graph.run(alternative_query, title=title).data()
+    
+    if not result or not result[0]['movie']:
+        raise HTTPException(status_code=404, detail="Movie not found")
+        
+    movie_data = result[0]['movie']
+    actors_data = result[0]['actors']
+    
+    return {
+        "movie": {
+            "title": movie_data["title"],
+            "year": movie_data.get("year")
+        },
+        "actors": [
+            {
+                "name": actor["name"]
+            } for actor in actors_data if actor  # Filter out None values
+        ]
+    }
+
+@app.get("/actors/{name}/filmography")
+async def get_actor_filmography(name: str):
+    cypher_query = """
+    MATCH (a:Actor {name: $name})-[:ACTED_IN]->(m:Movie)
+    WITH a as actor, m
+    ORDER BY m.year DESC, m.title
+    WITH actor, collect(m) as movies
+    RETURN actor, movies
+    """
+    
+    result = graph.run(cypher_query, name=name).data()
+    
+    if not result or not result[0]['actor']:
+        raise HTTPException(status_code=404, detail="Actor not found")
+        
+    actor_data = result[0]['actor']
+    movies_data = result[0]['movies']
+    
+    return {
+        "actor": {
+            "name": actor_data["name"],
+            "date_of_birth": actor_data.get("date_of_birth"),
+            "gender": actor_data.get("gender")
+        },
+        "movies": [
+            {
+                "title": movie["title"],
+                "year": movie.get("year")
+            } for movie in movies_data
+        ]
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+

@@ -2,3 +2,11 @@
 2024-09-21 18:47:29,399 - INFO - Actor added to Neo4j with filmography: Jeremy Irons
 2024-09-21 19:25:18,421 - INFO - Actor added to Neo4j with filmography: Amy Adams
 2024-09-21 19:25:37,025 - INFO - Actor added to Neo4j with filmography: Henry Cavill
+2024-09-28 11:12:20,784 - INFO - Actor added to Neo4j with filmography: Lily Collins
+2024-09-28 11:13:26,577 - ERROR - Error adding actor from TMDB: 404: Actor The Mortal Instruments: City of Bones not found in TMDB
+2024-09-30 20:47:23,944 - INFO - Actor added to Neo4j with filmography: Tom Cruise
+2024-09-30 20:47:24,343 - INFO - Actor added to Neo4j with filmography: Tom Cruise
+2024-10-03 19:57:04,886 - INFO - Actor added to Neo4j with filmography: Tom Hanks
+2024-10-03 21:08:31,031 - INFO - Actor added to Neo4j with filmography: John Cena
+2024-10-03 21:08:32,105 - INFO - Actor added to Neo4j with filmography: John Cena
+2024-10-03 21:08:33,120 - INFO - Actor added to Neo4j with filmography: John Cena
