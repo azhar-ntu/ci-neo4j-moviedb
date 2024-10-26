@@ -1,54 +1,24 @@
-export const Checkbox = ({ 
-    id, 
-    checked, 
-    onChange, 
-    label,
-    className = ""
-  }) => {
-    return (
-      <div className={`flex items-center space-x-2 ${className}`}>
-        <div className="relative">
-          <input
-            type="checkbox"
-            id={id}
-            checked={checked}
-            onChange={(e) => onChange(e.target.checked)}
-            className="peer sr-only" // Hidden actual checkbox
-          />
-          <div className={`
-            w-4 h-4 border rounded
-            cursor-pointer
-            transition-colors
-            hover:bg-gray-100
-            ${checked 
-              ? 'bg-blue-500 border-blue-500' 
-              : 'bg-white border-gray-300'
-            }
-          `}>
-            {/* Checkmark */}
-            {checked && (
-              <svg 
-                className="w-4 h-4 text-white" 
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            )}
-          </div>
-        </div>
-        {label && (
-          <label 
-            htmlFor={id}
-            className="text-sm text-gray-700 cursor-pointer select-none"
-          >
-            {label}
-          </label>
-        )}
-      </div>
-    );
-  };
+"use client"
+
+import * as React from "react"
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
+import { CheckIcon } from "@radix-ui/react-icons"
+
+import { cn } from "@/lib/utils"
+
+const Checkbox = React.forwardRef(({ className, ...props }, ref) => (
+  <CheckboxPrimitive.Root
+    ref={ref}
+    className={cn(
+      "peer h-4 w-4 shrink-0 rounded-sm border border-primary shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+      className
+    )}
+    {...props}>
+    <CheckboxPrimitive.Indicator className={cn("flex items-center justify-center text-current")}>
+      <CheckIcon className="h-4 w-4" />
+    </CheckboxPrimitive.Indicator>
+  </CheckboxPrimitive.Root>
+))
+Checkbox.displayName = CheckboxPrimitive.Root.displayName
+
+export { Checkbox }
