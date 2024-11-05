@@ -1,0 +1,4 @@
+2024-09-21 16:38:13,468 - INFO - Actor added to Neo4j: Tom Hanks
+2024-09-21 18:47:29,399 - INFO - Actor added to Neo4j with filmography: Jeremy Irons
+2024-09-21 19:25:18,421 - INFO - Actor added to Neo4j with filmography: Amy Adams
+2024-09-21 19:25:37,025 - INFO - Actor added to Neo4j with filmography: Henry Cavill
