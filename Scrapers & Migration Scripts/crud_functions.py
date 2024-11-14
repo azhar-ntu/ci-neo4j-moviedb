@@ -2,13 +2,7 @@ from py2neo import Graph, Node, Relationship
 import logging
 
 # Assuming graph is already connected
-# Neo4j connection setup
-NEO4J_URI = "bolt://localhost:7687"  # Update this with your Neo4j URI
-NEO4J_USER = "neo4j"  # Update this with your Neo4j username
-NEO4J_PASSWORD = "12345678"  # Update this with your Neo4j password
-
-# Connect to Neo4j
-graph = Graph(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+graph = Graph("bolt://localhost:7687", auth=("neo4j", "password"))  # Replace with your connection details
 
 # Create Function: Insert new Actor or Movie nodes
 def create_actor(name, date_of_birth=None, gender=None, date_of_death=None):
