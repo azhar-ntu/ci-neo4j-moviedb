@@ -30,10 +30,10 @@ NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
 TMDB_API_KEY = os.getenv("TMDB_API_KEY", "535b98608031a939cdef34fb2a98ebc5")
 TMDB_BASE_URL = os.getenv("TMDB_BASE_URL", "https://api.themoviedb.org/3")
 
-PORT = os.getenv("PORT",8000)
+PORT = os.getenv("PORT",100)
 
 # Connect to Neo4j
-graph = Graph(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+graph = Graph(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD),name="neo4j")
 matcher = NodeMatcher(graph)
 
 

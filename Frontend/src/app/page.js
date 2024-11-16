@@ -146,10 +146,10 @@ RETURN movie, actors`;
       let response;
       if (type === 'actor') {
         console.log(`Fetching actor: ${query}`);
-        response = await fetch(`http://localhost:8000/actors/${encodeURIComponent(query)}/filmography`);
+        response = await fetch(`http://localhost:10000/actors/${encodeURIComponent(query)}/filmography`);
       } else {
         console.log(`Fetching movie: ${query}`);
-        response = await fetch(`http://localhost:8000/movies/${encodeURIComponent(query)}/cast`);
+        response = await fetch(`http://localhost:10000/movies/${encodeURIComponent(query)}/cast`);
       }
       
       if (!response.ok) {
