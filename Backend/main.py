@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -8,6 +9,7 @@ from typing import Optional, List
 import logging
 import requests
 import re
+from datetime import datetime
 
 app = FastAPI()
 
@@ -20,17 +22,18 @@ app.add_middleware(
 )
 
 # Neo4j connection setup
-NEO4J_URI = "bolt://localhost:7687"  # Update this with your Neo4j URI
-NEO4J_USER = "neo4j"  # Update this with your Neo4j username
-NEO4J_PASSWORD = "password"  # Update this with your Neo4j password
+NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
+
+# TMDB API setup
+TMDB_API_KEY = os.getenv("TMDB_API_KEY", "535b98608031a939cdef34fb2a98ebc5")
+TMDB_BASE_URL = os.getenv("TMDB_BASE_URL", "https://api.themoviedb.org/3")
 
 # Connect to Neo4j
 graph = Graph(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
 matcher = NodeMatcher(graph)
 
-# TMDB API setup
-TMDB_API_KEY = "535b98608031a939cdef34fb2a98ebc5"  # Replace with your TMDB API key
-TMDB_BASE_URL = "https://api.themoviedb.org/3"
 
 # Set up logging
 logging.basicConfig(filename='api_log.txt', level=logging.INFO, 
@@ -422,6 +425,23 @@ async def get_actor_filmography(name: str):
                 "year": movie.get("year")
             } for movie in movies_data
         ]
+    }
+
+@app.get("/health")
+async def health_check():
+    try:
+        # Test Neo4j connection
+        neo4j_status = graph.run("RETURN 1").evaluate() == 1
+    except Exception:
+        neo4j_status = False
+
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "services": {
+            "neo4j": "up" if neo4j_status else "down",
+            "api": "up"
+        }
     }
 
 if __name__ == "__main__":
