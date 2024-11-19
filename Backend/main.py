@@ -294,6 +294,7 @@ async def get_actor_filmography(name: str):
     RETURN actor, movies
     """
     
+    result = graph.run(cypher_query, name=name).data()
     
     if not result or not result[0]['actor']:
         raise HTTPException(status_code=404, detail="Actor not found")
