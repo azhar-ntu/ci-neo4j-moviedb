@@ -14,3 +14,18 @@
 2024-11-20 03:01:52,819 - INFO - Actor added to Neo4j with filmography: Jared Padalecki
 2024-11-20 03:02:48,663 - INFO - Actor added to Neo4j with filmography: Dwayne Johnson
 2024-11-20 03:02:49,487 - INFO - Actor added to Neo4j with filmography: Dwayne Johnson
+2024-11-20 03:46:20,390 - INFO - Actor added to Neo4j with filmography: Peyton List
+2024-11-20 03:46:48,536 - INFO - Actor added to Neo4j with filmography: Chris Tucker
+2024-11-20 03:47:16,483 - INFO - Actor added to Neo4j with filmography: Jackie Chan
+2024-11-20 03:47:47,042 - INFO - Actor added to Neo4j with filmography: Sean Connery
+2024-11-20 03:47:47,496 - INFO - Actor added to Neo4j with filmography: Sean Connery
+2024-11-20 04:05:46,510 - INFO - Actor added to Neo4j with filmography: Sean Gunn
+2024-11-20 04:11:15,519 - INFO - Actor added to Neo4j with filmography: James Gunn
+2024-11-20 04:17:24,212 - INFO - Actor added to Neo4j with filmography: Peter Dinklage
+2024-11-20 04:17:43,761 - INFO - Actor added to Neo4j with filmography: Viola Davis
+2024-11-20 04:19:56,243 - INFO - Actor added to Neo4j with filmography: Andrew Garfield
+2024-11-20 04:23:37,424 - INFO - Actor added to Neo4j with filmography: Ben Stiller
+2024-11-20 04:25:03,293 - INFO - Actor added to Neo4j with filmography: Bryce Dallas Howard
+2024-11-20 04:26:03,375 - INFO - Actor added to Neo4j with filmography: John Stamos
+2024-11-20 04:33:37,440 - INFO - Actor added to Neo4j with filmography: Owen Wilson
+2024-11-20 04:34:14,657 - INFO - Actor added to Neo4j with filmography: Jonathan Majors

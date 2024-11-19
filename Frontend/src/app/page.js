@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Search, User, Film } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -52,14 +52,50 @@ const CypherQueryDisplay = ({ query }) => {
   );
 };
 
+const capitalizeFirstLetter = (string) => {
+  if (!string) return '';
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
 const DetailsCard = ({ data, type }) => {
   if (!data) return null;
 
-  if (type === 'actor') {
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Unknown';
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+
+  const calculateAge = (birthDate, deathDate) => {
+    if (!birthDate) return null;
+    
+    const birth = new Date(birthDate);
+    const end = deathDate ? new Date(deathDate) : new Date();
+    
+    let age = end.getFullYear() - birth.getFullYear();
+    const monthDiff = end.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && end.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    return age;
+  };
+
+  // Actor Card
+  if (type === 'actor' && data.actor && data.movies) {
     const { actor, movies } = data;
     const imageUrl = actor?.profile_path ? 
       `https://image.tmdb.org/t/p/w185${actor.profile_path}` : 
       null;
+
+    const age = calculateAge(actor.date_of_birth, actor.date_of_death);
 
     return (
       <Card className="mb-4">
@@ -88,17 +124,18 @@ const DetailsCard = ({ data, type }) => {
                       <span className="font-medium">Gender:</span> {actor.gender || 'Not specified'}
                     </p>
                     <p className="text-gray-600">
-                      <span className="font-medium">Born:</span> {actor.date_of_birth || 'Unknown'}
+                      <span className="font-medium">Born:</span> {formatDate(actor.date_of_birth)}
+                      {age && ` (${age} years${actor.date_of_death ? ' old at death' : ''})`}
                     </p>
                     {actor.date_of_death && (
                       <p className="text-gray-600">
-                        <span className="font-medium">Died:</span> {actor.date_of_death}
+                        <span className="font-medium">Died:</span> {formatDate(actor.date_of_death)}
                       </p>
                     )}
                   </div>
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-sm text-gray-500">No of Movies</span>
+                  <span className="text-sm text-gray-500">Movies</span>
                   <span className="font-medium text-lg">{movies.length}</span>
                 </div>
               </div>
@@ -121,68 +158,118 @@ const DetailsCard = ({ data, type }) => {
     );
   }
 
-  const { movie, actors } = data;
-  const imageUrl = movie?.profile_path ? 
-    `https://image.tmdb.org/t/p/w185${movie.profile_path}` : 
-    null;
+  // Movie Card
+  if (type === 'movie' && data.movie && data.actors) {
+    const { movie, actors } = data;
+    const imageUrl = movie?.profile_path ? 
+      `https://image.tmdb.org/t/p/w185${movie.profile_path}` : 
+      null;
 
-  return (
-    <Card className="mb-4">
-      <CardContent className="p-6">
-        <div className="flex gap-6">
-          <div className="flex-shrink-0 w-32 h-48">
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={movie.title}
-                className="w-full h-full object-cover rounded-lg shadow-md"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 rounded-lg shadow-md flex items-center justify-center">
-                <Film className="w-12 h-12 text-gray-400" />
-              </div>
-            )}
-          </div>
-          
-          <div className="flex-1">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-2xl font-bold mb-2">{movie.title}</h2>
-                <div className="space-y-1">
-                  {movie.year && (
-                    <p className="text-gray-600">
-                      <span className="font-medium">Release Year:</span> {movie.year}
-                    </p>
-                  )}
-                  <p className="text-gray-600">
-                    Features {actors.length} {actors.length === 1 ? 'actor' : 'actors'} currently in the database.
-                  </p>
-                </div>
-              </div>
-              {movie.rating && (
-                <div className="flex flex-col items-end">
-                  <span className="text-sm text-gray-500">Rating</span>
-                  <span className="font-medium text-lg">{movie.rating}</span>
+    return (
+      <Card className="mb-4">
+        <CardContent className="p-6">
+          <div className="flex gap-6">
+            <div className="flex-shrink-0 w-32 h-48">
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={movie.title}
+                  className="w-full h-full object-cover rounded-lg shadow-md"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 rounded-lg shadow-md flex items-center justify-center">
+                  <Film className="w-12 h-12 text-gray-400" />
                 </div>
               )}
             </div>
-
-            {movie.overview && (
-              <div className="mt-4">
-                <h3 className="text-sm font-medium text-gray-600 mb-1">Overview</h3>
-                <p className="text-sm text-gray-800">{movie.overview}</p>
+            
+            <div className="flex-1">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">{movie.title}</h2>
+                  <div className="space-y-1">
+                    {movie.year && (
+                      <p className="text-gray-600">
+                        <span className="font-medium">Release Year:</span> {movie.year}
+                      </p>
+                    )}
+                    <p className="text-gray-600">
+                      <span className="font-medium">Cast:</span> {actors.length} {actors.length === 1 ? 'actor' : 'actors'}
+                    </p>
+                  </div>
+                </div>
+                {movie.rating && (
+                  <div className="flex flex-col items-end">
+                    <span className="text-sm text-gray-500">Rating</span>
+                    <span className="font-medium text-lg">{movie.rating}</span>
+                  </div>
+                )}
               </div>
-            )}
+
+              {movie.overview && (
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium text-gray-600 mb-1">Overview</h3>
+                  <p className="text-sm text-gray-800">{movie.overview}</p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return null;
 };
+
+const addActorFromTMDB = async (actorName) => {
+  try {
+    const response = await fetch(`http://localhost:10000/add_actor_from_tmdb/${encodeURIComponent(actorName)}`, {
+      method: 'POST',
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to add actor');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error adding actor:', error);
+    throw error;
+  }
+};
+
+const NotFoundMessage = ({ type, query, onAddActor }) => (
+  <div className="text-center py-12">
+    <div className="mb-4">
+      <span className="text-6xl">🔍</span>
+    </div>
+    <h2 className="text-2xl font-bold mb-2">No {capitalizeFirstLetter(type)} Found</h2>
+    <p className="text-gray-600 mb-6">
+      We couldn't find any {type === 'actor' ? 'actor' : 'movie'} matching "{query}"
+    </p>
+    {type === 'actor' && (
+      <div className="space-y-4">
+        <p className="text-sm text-gray-500">
+          Would you like to add this actor from TMDB?
+        </p>
+        <Button 
+          onClick={onAddActor}
+          className="bg-blue-500 hover:bg-blue-600"
+        >
+          Add Actor from TMDB
+        </Button>
+      </div>
+    )}
+  </div>
+);
+
 export default function Home() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+  const ForceGraphRef = useRef();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState('actor');
   const [searchResults, setSearchResults] = useState(null);
@@ -192,6 +279,9 @@ export default function Home() {
   const [selectedNode, setSelectedNode] = useState(null);
   const [currentQuery, setCurrentQuery] = useState('');
   const [showCypherQuery, setShowCypherQuery] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [lastSearchedQuery, setLastSearchedQuery] = useState('');
+
 
   // Initialize state from URL on component mount
   useEffect(() => {
@@ -276,6 +366,10 @@ export default function Home() {
     setSearchResults(null);
     setGraphData({ nodes: [], links: [] });
     setCurrentQuery('');
+    setNotFound(false);
+    setLastSearchedQuery('');
+
+    router.push('/', { scroll: false });
   };
   
   const handleSearch = async (query = searchQuery, type = searchType) => {
@@ -283,8 +377,11 @@ export default function Home() {
     
     setLoading(true);
     setError(null);
+    setNotFound(false);
     setSelectedNode(null);
+    setLastSearchedQuery(query);
     updateURL(query, type);
+
     
     // Set the current Cypher query based on search type
     const cypherQuery = type === 'actor' 
@@ -303,25 +400,34 @@ RETURN movie, actors`;
     setCurrentQuery(cypherQuery);
     
     try {
-      let response;
-      if (type === 'actor') {
-        console.log(`Fetching actor: ${query}`);
-        response = await fetch(`http://localhost:10000/actors/${encodeURIComponent(query)}/filmography`);
-      } else {
-        console.log(`Fetching movie: ${query}`);
-        response = await fetch(`http://localhost:10000/movies/${encodeURIComponent(query)}/cast`);
-      }
+      const response = await fetch(`http://localhost:10000/${type}s/${encodeURIComponent(query)}/${type === 'actor' ? 'filmography' : 'cast'}`);
       
+      if (response.status === 404) {
+        setNotFound(true);
+        setSearchResults(null);
+        setGraphData({ nodes: [], links: [] });
+        setLoading(false);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(`Search failed: ${response.status}`);
       }
       
       const data = await response.json();
-      console.log('Search results:', data);
-      setSearchResults(data);
       
-      const newGraphData = transformToGraphData(data, type);
-      setGraphData(newGraphData);
+      // Check if the response is empty
+      
+      if (!data || 
+        (type === 'actor' && (!data.actor || !data.movies?.length)) || 
+        (type === 'movie' && (!data.movie || !data.actors?.length))) {
+        setNotFound(true);
+        setSearchResults(null);
+        setGraphData({ nodes: [], links: [] });
+      } else {
+        setSearchResults(data);
+        setGraphData(transformToGraphData(data, type));
+      }
     } catch (err) {
       console.error('Search error:', err);
       setError('Failed to fetch data. Please try again.');
@@ -350,6 +456,24 @@ RETURN movie, actors`;
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleSearch();
+    }
+  };
+
+  const handleAddActor = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await addActorFromTMDB(searchQuery);
+      
+      // After successfully adding the actor, perform a new search
+      if (result) {
+        await handleSearch(searchQuery, 'actor');
+      }
+    } catch (error) {
+      setError('Failed to add actor from TMDB. Please try again.');
+      setNotFound(true); // Keep the not found state if addition fails
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -400,25 +524,16 @@ RETURN movie, actors`;
             </div>
           )}
 
-          {selectedNode && (
-            <div className="mb-4 p-4 bg-white rounded-lg shadow">
-              <h3 className="font-semibold text-lg mb-2">
-                {selectedNode.type === "actor" ? "Actor" : "Movie"}:{" "}
-                {selectedNode.name}
-              </h3>
-              {selectedNode.year && (
-                <p className="text-gray-600">Year: {selectedNode.year}</p>
-              )}
-              <p className="text-sm text-gray-500 mt-1">
-                Click on other nodes to explore connections
-              </p>
-            </div>
-          )}
-
           {loading ? (
             <div className="flex justify-center items-center h-96">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
             </div>
+          ) : notFound ? (
+            <NotFoundMessage
+              type={searchType}
+              query={lastSearchedQuery}
+              onAddActor={handleAddActor}
+            />
           ) : graphData.nodes.length > 0 ? (
             <div className="space-y-8">
               {searchResults && (
@@ -443,8 +558,9 @@ RETURN movie, actors`;
               {showCypherQuery && <CypherQueryDisplay query={currentQuery} />}
 
               {/* Graph Visualization */}
-              <div className="h-[600px] border rounded-lg overflow-hidden bg-white">
+              <div className="h-[600px] border rounded-lg overflow-hidden bg-white relative">
                 <ForceGraph2D
+                  ref={ForceGraphRef}
                   graphData={graphData}
                   nodeLabel="name"
                   nodeColor={(node) =>
@@ -454,11 +570,22 @@ RETURN movie, actors`;
                       ? "#ff6b6b"
                       : "#4ecdc4"
                   }
+                  width={window.innerWidth * 0.65} // Reduced from 0.8 to 0.65
+                  height={600}
+                  centerAt={[window.innerWidth * 0.3, 300]} // Wrapped in array brackets
                   nodeRelSize={8}
                   linkWidth={2}
                   linkColor={() => "#cbd5e1"}
                   backgroundColor="#ffffff"
                   onNodeClick={handleNodeClick}
+                  enableZoom={true}
+                  minZoom={0.5}
+                  maxZoom={4}
+                  cooldownTicks={50}
+                  linkDistance={100}
+                  d3AlphaDecay={0.02}
+                  d3VelocityDecay={0.3}
+                  autoPauseRedraw={false}
                   nodeCanvasObject={(node, ctx, globalScale) => {
                     const label = node.name;
                     const fontSize = 12 / globalScale;
@@ -492,9 +619,64 @@ RETURN movie, actors`;
                     ctx.fillStyle = "#000000";
                     ctx.fillText(label, node.x, node.y + 12);
                   }}
+                  onEngineStop={() => {
+                    const graphBounds = {
+                      x: { min: Infinity, max: -Infinity },
+                      y: { min: Infinity, max: -Infinity },
+                    };
+
+                    graphData.nodes.forEach((node) => {
+                      graphBounds.x.min = Math.min(
+                        graphBounds.x.min,
+                        node.x || 0
+                      );
+                      graphBounds.x.max = Math.max(
+                        graphBounds.x.max,
+                        node.x || 0
+                      );
+                      graphBounds.y.min = Math.min(
+                        graphBounds.y.min,
+                        node.y || 0
+                      );
+                      graphBounds.y.max = Math.max(
+                        graphBounds.y.max,
+                        node.y || 0
+                      );
+                    });
+
+                    const graphWidth = graphBounds.x.max - graphBounds.x.min;
+                    const graphHeight = graphBounds.y.max - graphBounds.y.min;
+                    const graphCenter = {
+                      x: (graphBounds.x.min + graphWidth / 2) * 0.8, // Added multiplier to shift left
+                      y: graphBounds.y.min + graphHeight / 2,
+                    };
+
+                    const zoomLevel =
+                      Math.min(
+                        (window.innerWidth * 0.65) / graphWidth, // Updated to match new width
+                        600 / graphHeight
+                      ) * 0.9;
+
+                    ForceGraphRef.current?.centerAt(
+                      graphCenter.x,
+                      graphCenter.y,
+                      1000
+                    );
+                    ForceGraphRef.current?.zoom(zoomLevel, 1000);
+                  }}
                 />
               </div>
-
+              {/* Graph Legend */}
+              <div className="flex gap-4 justify-center text-sm">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded-full bg-[#ff6b6b] mr-2"></div>
+                  <span>Actors</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded-full bg-[#4ecdc4] mr-2"></div>
+                  <span>Movies</span>
+                </div>
+              </div>
               {/* Results List */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between px-2">
@@ -574,18 +756,6 @@ RETURN movie, actors`;
                         </Card>
                       ))
                     : null}
-                </div>
-              </div>
-
-              {/* Graph Legend */}
-              <div className="flex gap-4 justify-center text-sm">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-[#ff6b6b] mr-2"></div>
-                  <span>Actors</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-[#4ecdc4] mr-2"></div>
-                  <span>Movies</span>
                 </div>
               </div>
             </div>
