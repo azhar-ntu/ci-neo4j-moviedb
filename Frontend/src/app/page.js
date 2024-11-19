@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Search, User, Film } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -52,6 +53,9 @@ const CypherQueryDisplay = ({ query }) => {
 };
 
 export default function Home() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState('actor');
   const [searchResults, setSearchResults] = useState(null);
@@ -61,6 +65,26 @@ export default function Home() {
   const [selectedNode, setSelectedNode] = useState(null);
   const [currentQuery, setCurrentQuery] = useState('');
   const [showCypherQuery, setShowCypherQuery] = useState(true);
+
+  // Initialize state from URL on component mount
+  useEffect(() => {
+    const query = searchParams.get('q');
+    const type = searchParams.get('type');
+    
+    if (query) {
+      setSearchQuery(query);
+      setSearchType(type || 'actor');
+      handleSearch(query, type || 'actor');
+    }
+  }, []);
+
+  // Update URL when search is performed
+  const updateURL = (query, type) => {
+    const params = new URLSearchParams();
+    params.set('q', query);
+    params.set('type', type);
+    router.push(`/?${params.toString()}`, { scroll: false });
+  };
 
   const transformToGraphData = (data, type) => {
     const nodes = [];
@@ -125,6 +149,7 @@ export default function Home() {
     setLoading(true);
     setError(null);
     setSelectedNode(null);
+    updateURL(query, type);
     
     // Set the current Cypher query based on search type
     const cypherQuery = type === 'actor' 
