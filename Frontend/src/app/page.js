@@ -57,32 +57,15 @@ const DetailsCard = ({ data, type }) => {
 
   if (type === 'actor') {
     const { actor, movies } = data;
-    const imageUrl = actor.profile_path ? 
-    `https://image.tmdb.org/t/p/w185${actor.profile_path}` : 
-    null;
-    const formatDate = (dateString) => {
-      if (!dateString) return 'Unknown';
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    };
-
-    const getAge = (birth, death) => {
-      if (!birth) return null;
-      const endDate = death ? new Date(death) : new Date();
-      const age = Math.floor((endDate - new Date(birth)) / (365.25 * 24 * 60 * 60 * 1000));
-      return age;
-    };
-
-    const age = getAge(actor.date_of_birth, actor.date_of_death);
+    const imageUrl = actor?.profile_path ? 
+      `https://image.tmdb.org/t/p/w185${actor.profile_path}` : 
+      null;
 
     return (
       <Card className="mb-4">
         <CardContent className="p-6">
           <div className="flex gap-6">
-          <div className="flex-shrink-0 w-32 h-40">
+            <div className="flex-shrink-0 w-32 h-40">
               {imageUrl ? (
                 <img
                   src={imageUrl}
@@ -95,6 +78,7 @@ const DetailsCard = ({ data, type }) => {
                 </div>
               )}
             </div>
+            
             <div className="flex-1">
               <div className="flex justify-between items-start mb-4">
                 <div className="space-y-2">
@@ -104,25 +88,26 @@ const DetailsCard = ({ data, type }) => {
                       <span className="font-medium">Gender:</span> {actor.gender || 'Not specified'}
                     </p>
                     <p className="text-gray-600">
-                      <span className="font-medium">Born:</span> {formatDate(actor.date_of_birth)}
-                      {age && ` (${age} years${actor.date_of_death ? ' old at death' : ''})`}
+                      <span className="font-medium">Born:</span> {actor.date_of_birth || 'Unknown'}
                     </p>
                     {actor.date_of_death && (
                       <p className="text-gray-600">
-                        <span className="font-medium">Died:</span> {formatDate(actor.date_of_death)}
+                        <span className="font-medium">Died:</span> {actor.date_of_death}
                       </p>
                     )}
                   </div>
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-sm text-gray-500">Movies</span>
+                  <span className="text-sm text-gray-500">No of Movies</span>
                   <span className="font-medium text-lg">{movies.length}</span>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm mt-4">
                 <div>
                   <span className="text-gray-500">First Movie</span>
-                  <p className="font-medium">{movies[movies.length - 1]?.title || 'N/A'} ({movies[movies.length - 1]?.year || 'N/A'})</p>
+                  <p className="font-medium">
+                    {movies[movies.length - 1]?.title || 'N/A'} ({movies[movies.length - 1]?.year || 'N/A'})
+                  </p>
                 </div>
                 <div>
                   <span className="text-gray-500">Latest Movie</span>
@@ -136,21 +121,58 @@ const DetailsCard = ({ data, type }) => {
     );
   }
 
-
   const { movie, actors } = data;
+  const imageUrl = movie?.profile_path ? 
+    `https://image.tmdb.org/t/p/w185${movie.profile_path}` : 
+    null;
+
   return (
     <Card className="mb-4">
       <CardContent className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h2 className="text-2xl font-bold mb-2">{movie.title}</h2>
-            <p className="text-gray-600">
-              Features {actors.length} {actors.length === 1 ? 'actor' : 'actors'}
-            </p>
+        <div className="flex gap-6">
+          <div className="flex-shrink-0 w-32 h-48">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={movie.title}
+                className="w-full h-full object-cover rounded-lg shadow-md"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 rounded-lg shadow-md flex items-center justify-center">
+                <Film className="w-12 h-12 text-gray-400" />
+              </div>
+            )}
           </div>
-          <div className="flex flex-col items-end">
-            <span className="text-sm text-gray-500">Release Year</span>
-            <span className="font-medium">{movie.year || 'N/A'}</span>
+          
+          <div className="flex-1">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h2 className="text-2xl font-bold mb-2">{movie.title}</h2>
+                <div className="space-y-1">
+                  {movie.year && (
+                    <p className="text-gray-600">
+                      <span className="font-medium">Release Year:</span> {movie.year}
+                    </p>
+                  )}
+                  <p className="text-gray-600">
+                    Features {actors.length} {actors.length === 1 ? 'actor' : 'actors'} currently in the database.
+                  </p>
+                </div>
+              </div>
+              {movie.rating && (
+                <div className="flex flex-col items-end">
+                  <span className="text-sm text-gray-500">Rating</span>
+                  <span className="font-medium text-lg">{movie.rating}</span>
+                </div>
+              )}
+            </div>
+
+            {movie.overview && (
+              <div className="mt-4">
+                <h3 className="text-sm font-medium text-gray-600 mb-1">Overview</h3>
+                <p className="text-sm text-gray-800">{movie.overview}</p>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
@@ -247,7 +269,15 @@ export default function Home() {
 
     return { nodes, links };
   };
-
+  const handleTypeChange = (newType) => {
+    setSearchType(newType);
+    setSearchQuery('');
+    setSelectedNode(null);
+    setSearchResults(null);
+    setGraphData({ nodes: [], links: [] });
+    setCurrentQuery('');
+  };
+  
   const handleSearch = async (query = searchQuery, type = searchType) => {
     if (!query.trim()) return;
     
@@ -333,7 +363,9 @@ RETURN movie, actors`;
           <div className="flex gap-4 mb-8">
             <div className="flex-1">
               <Input
-                placeholder={`Search for ${searchType === 'actor' ? 'an actor' : 'a movie'}...`}
+                placeholder={`Search for ${
+                  searchType === "actor" ? "an actor" : "a movie"
+                }...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -342,21 +374,15 @@ RETURN movie, actors`;
             </div>
             <div className="flex gap-2">
               <Button
-                variant={searchType === 'actor' ? 'default' : 'outline'}
-                onClick={() => {
-                  setSearchType('actor');
-                  setSelectedNode(null);
-                }}
+                variant={searchType === "actor" ? "default" : "outline"}
+                onClick={() => handleTypeChange("actor")}
               >
                 <User className="w-4 h-4 mr-2" />
                 Actor
               </Button>
               <Button
-                variant={searchType === 'movie' ? 'default' : 'outline'}
-                onClick={() => {
-                  setSearchType('movie');
-                  setSelectedNode(null);
-                }}
+                variant={searchType === "movie" ? "default" : "outline"}
+                onClick={() => handleTypeChange("movie")}
               >
                 <Film className="w-4 h-4 mr-2" />
                 Movie
@@ -377,7 +403,8 @@ RETURN movie, actors`;
           {selectedNode && (
             <div className="mb-4 p-4 bg-white rounded-lg shadow">
               <h3 className="font-semibold text-lg mb-2">
-                {selectedNode.type === 'actor' ? 'Actor' : 'Movie'}: {selectedNode.name}
+                {selectedNode.type === "actor" ? "Actor" : "Movie"}:{" "}
+                {selectedNode.name}
               </h3>
               {selectedNode.year && (
                 <p className="text-gray-600">Year: {selectedNode.year}</p>
@@ -412,52 +439,57 @@ RETURN movie, actors`;
                 </label>
               </div>
 
-
               {/* Conditionally Render CypherQueryDisplay */}
               {showCypherQuery && <CypherQueryDisplay query={currentQuery} />}
-
 
               {/* Graph Visualization */}
               <div className="h-[600px] border rounded-lg overflow-hidden bg-white">
                 <ForceGraph2D
                   graphData={graphData}
                   nodeLabel="name"
-                  nodeColor={node => 
-                    selectedNode?.id === node.id 
-                      ? '#fbbf24' 
-                      : node.type === 'actor' 
-                        ? '#ff6b6b' 
-                        : '#4ecdc4'
+                  nodeColor={(node) =>
+                    selectedNode?.id === node.id
+                      ? "#fbbf24"
+                      : node.type === "actor"
+                      ? "#ff6b6b"
+                      : "#4ecdc4"
                   }
                   nodeRelSize={8}
                   linkWidth={2}
-                  linkColor={() => '#cbd5e1'}
+                  linkColor={() => "#cbd5e1"}
                   backgroundColor="#ffffff"
                   onNodeClick={handleNodeClick}
                   nodeCanvasObject={(node, ctx, globalScale) => {
                     const label = node.name;
-                    const fontSize = 12/globalScale;
+                    const fontSize = 12 / globalScale;
                     const isSelected = selectedNode?.id === node.id;
-                    
+
                     ctx.beginPath();
-                    ctx.arc(node.x, node.y, isSelected ? 8 : 5, 0, 2 * Math.PI, false);
-                    ctx.fillStyle = isSelected 
-                      ? '#fbbf24' 
-                      : node.type === 'actor' 
-                        ? '#ff6b6b' 
-                        : '#4ecdc4';
+                    ctx.arc(
+                      node.x,
+                      node.y,
+                      isSelected ? 8 : 5,
+                      0,
+                      2 * Math.PI,
+                      false
+                    );
+                    ctx.fillStyle = isSelected
+                      ? "#fbbf24"
+                      : node.type === "actor"
+                      ? "#ff6b6b"
+                      : "#4ecdc4";
                     ctx.fill();
-                    
+
                     if (isSelected) {
-                      ctx.strokeStyle = '#f59e0b';
+                      ctx.strokeStyle = "#f59e0b";
                       ctx.lineWidth = 2;
                       ctx.stroke();
                     }
-                    
+
                     ctx.font = `${fontSize}px Sans-Serif`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillStyle = '#000000';
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillStyle = "#000000";
                     ctx.fillText(label, node.x, node.y + 12);
                   }}
                 />
@@ -467,73 +499,81 @@ RETURN movie, actors`;
               <div className="space-y-4">
                 <div className="flex items-center justify-between px-2">
                   <h2 className="text-xl font-semibold">
-                    {searchType === 'actor' 
-                      ? 'Filmography (Newest First)' 
-                      : 'Cast (Alphabetical)'}
+                    {searchType === "actor"
+                      ? "Filmography (Newest First)"
+                      : "Cast (Alphabetical)"}
                   </h2>
                   <div className="text-sm text-gray-500">
-                    {searchType === 'actor' && searchResults?.movies
+                    {searchType === "actor" && searchResults?.movies
                       ? `${searchResults.movies.length} movies`
-                      : searchType === 'movie' && searchResults?.actors
+                      : searchType === "movie" && searchResults?.actors
                       ? `${searchResults.actors.length} actors`
-                      : ''}
+                      : ""}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {searchType === 'actor' && searchResults?.movies ? (
-                    searchResults.movies.map((movie, index) => (
-                      <Card 
-                        key={index}
-                        className={`cursor-pointer transition-colors ${
-                          selectedNode?.id === movie.title ? 'bg-yellow-50 border-yellow-400' : ''
-                        }`}
-                        onClick={() => handleNodeClick({
-                          id: movie.title,
-                          name: movie.title,
-                          type: 'movie',
-                          year: movie.year
-                        })}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start">
-                            <h3 className="font-semibold">{movie.title}</h3>
-                            {movie.year && (
-                              <span className="text-sm font-medium bg-gray-100 px-2 py-1 rounded">
-                                {movie.year}
-                              </span>
-                            )}
-                          </div>
-                          <div className="mt-2 text-sm text-gray-500">
-                            Click to see cast
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  ) : searchType === 'movie' && searchResults?.actors ? (
-                    searchResults.actors.map((actor, index) => (
-                      <Card 
-                        key={index}
-                        className={`cursor-pointer transition-colors ${
-                          selectedNode?.id === actor.name ? 'bg-yellow-50 border-yellow-400' : ''
-                        }`}
-                        onClick={() => handleNodeClick({
-                          id: actor.name,
-                          name: actor.name,
-                          type: 'actor'
-                        })}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start">
-                            <h3 className="font-semibold">{actor.name}</h3>
-                          </div>
-                          <div className="mt-2 text-sm text-gray-500">
-                            Click to see filmography
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  ) : null}
+                  {searchType === "actor" && searchResults?.movies
+                    ? searchResults.movies.map((movie, index) => (
+                        <Card
+                          key={index}
+                          className={`cursor-pointer transition-colors ${
+                            selectedNode?.id === movie.title
+                              ? "bg-yellow-50 border-yellow-400"
+                              : ""
+                          }`}
+                          onClick={() =>
+                            handleNodeClick({
+                              id: movie.title,
+                              name: movie.title,
+                              type: "movie",
+                              year: movie.year,
+                            })
+                          }
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start">
+                              <h3 className="font-semibold">{movie.title}</h3>
+                              {movie.year && (
+                                <span className="text-sm font-medium bg-gray-100 px-2 py-1 rounded">
+                                  {movie.year}
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-2 text-sm text-gray-500">
+                              Click to see cast
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    : searchType === "movie" && searchResults?.actors
+                    ? searchResults.actors.map((actor, index) => (
+                        <Card
+                          key={index}
+                          className={`cursor-pointer transition-colors ${
+                            selectedNode?.id === actor.name
+                              ? "bg-yellow-50 border-yellow-400"
+                              : ""
+                          }`}
+                          onClick={() =>
+                            handleNodeClick({
+                              id: actor.name,
+                              name: actor.name,
+                              type: "actor",
+                            })
+                          }
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start">
+                              <h3 className="font-semibold">{actor.name}</h3>
+                            </div>
+                            <div className="mt-2 text-sm text-gray-500">
+                              Click to see filmography
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    : null}
                 </div>
               </div>
 
@@ -547,15 +587,12 @@ RETURN movie, actors`;
                   <div className="w-3 h-3 rounded-full bg-[#4ecdc4] mr-2"></div>
                   <span>Movies</span>
                 </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-[#fbbf24] mr-2"></div>
-                  <span>Selected</span>
-                </div>
               </div>
             </div>
           ) : (
             <div className="text-center text-gray-500 h-96 flex items-center justify-center">
-              Search for {searchType === 'actor' ? 'an actor' : 'a movie'} to see their connections
+              Search for {searchType === "actor" ? "an actor" : "a movie"} to
+              see their connections
             </div>
           )}
         </CardContent>

@@ -288,20 +288,34 @@ async def add_actor_from_tmdb(actor_name: str):
 async def get_actor_filmography(name: str):
     cypher_query = """
     MATCH (a:Actor {name: $name})-[:ACTED_IN]->(m:Movie)
-    RETURN a AS actor, collect(m) AS movies
+    WITH a as actor, m
+    ORDER BY COALESCE(m.year, '') DESC, m.title
+    WITH actor, collect(m) as movies
+    RETURN actor, movies
     """
-    result = graph.run(cypher_query, name=name).data()
     
-    if not result:
-        return None
     
+    if not result or not result[0]['actor']:
+        raise HTTPException(status_code=404, detail="Actor not found")
+        
     actor_data = result[0]['actor']
     movies_data = result[0]['movies']
     
-    return ActorFilmography(
-        actor=Actor(**dict(actor_data)),
-        movies=[Movie(**dict(movie)) for movie in movies_data]
-    )
+    return {
+        "actor": {
+            "name": actor_data["name"],
+            "date_of_birth": actor_data.get("date_of_birth"),
+            "date_of_death": actor_data.get("date_of_death"),
+            "gender": actor_data.get("gender"),
+            "profile_path": actor_data.get("profile_path")
+        },
+        "movies": [
+            {
+                "title": movie["title"],
+                "year": movie.get("year")
+            } for movie in movies_data
+        ]
+    }
 @app.post("/actors/add")
 async def add_actor(actor: ActorCreate):
     try:
@@ -400,8 +414,8 @@ async def get_movie_cast(title: str):
         ]
     }
 
-@app.get("/actors/{name}/filmography")
-async def get_actor_filmography(name: str):
+# @app.get("/actors/{name}/filmography")
+# async def get_actor_filmography(name: str):
     cypher_query = """
     MATCH (a:Actor {name: $name})-[:ACTED_IN]->(m:Movie)
     WITH a as actor, m
