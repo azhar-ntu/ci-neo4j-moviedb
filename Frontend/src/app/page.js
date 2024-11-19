@@ -52,6 +52,111 @@ const CypherQueryDisplay = ({ query }) => {
   );
 };
 
+const DetailsCard = ({ data, type }) => {
+  if (!data) return null;
+
+  if (type === 'actor') {
+    const { actor, movies } = data;
+    const imageUrl = actor.profile_path ? 
+    `https://image.tmdb.org/t/p/w185${actor.profile_path}` : 
+    null;
+    const formatDate = (dateString) => {
+      if (!dateString) return 'Unknown';
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    };
+
+    const getAge = (birth, death) => {
+      if (!birth) return null;
+      const endDate = death ? new Date(death) : new Date();
+      const age = Math.floor((endDate - new Date(birth)) / (365.25 * 24 * 60 * 60 * 1000));
+      return age;
+    };
+
+    const age = getAge(actor.date_of_birth, actor.date_of_death);
+
+    return (
+      <Card className="mb-4">
+        <CardContent className="p-6">
+          <div className="flex gap-6">
+          <div className="flex-shrink-0 w-32 h-40">
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={actor.name}
+                  className="w-full h-full object-cover rounded-lg shadow-md"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 rounded-lg shadow-md flex items-center justify-center">
+                  <User className="w-12 h-12 text-gray-400" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1">
+              <div className="flex justify-between items-start mb-4">
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-bold">{actor.name}</h2>
+                  <div className="space-y-1 text-sm">
+                    <p className="text-gray-600">
+                      <span className="font-medium">Gender:</span> {actor.gender || 'Not specified'}
+                    </p>
+                    <p className="text-gray-600">
+                      <span className="font-medium">Born:</span> {formatDate(actor.date_of_birth)}
+                      {age && ` (${age} years${actor.date_of_death ? ' old at death' : ''})`}
+                    </p>
+                    {actor.date_of_death && (
+                      <p className="text-gray-600">
+                        <span className="font-medium">Died:</span> {formatDate(actor.date_of_death)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-sm text-gray-500">Movies</span>
+                  <span className="font-medium text-lg">{movies.length}</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-sm mt-4">
+                <div>
+                  <span className="text-gray-500">First Movie</span>
+                  <p className="font-medium">{movies[movies.length - 1]?.title || 'N/A'} ({movies[movies.length - 1]?.year || 'N/A'})</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Latest Movie</span>
+                  <p className="font-medium">{movies[0]?.title || 'N/A'} ({movies[0]?.year || 'N/A'})</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+
+  const { movie, actors } = data;
+  return (
+    <Card className="mb-4">
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h2 className="text-2xl font-bold mb-2">{movie.title}</h2>
+            <p className="text-gray-600">
+              Features {actors.length} {actors.length === 1 ? 'actor' : 'actors'}
+            </p>
+          </div>
+          <div className="flex flex-col items-end">
+            <span className="text-sm text-gray-500">Release Year</span>
+            <span className="font-medium">{movie.year || 'N/A'}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 export default function Home() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -289,6 +394,9 @@ RETURN movie, actors`;
             </div>
           ) : graphData.nodes.length > 0 ? (
             <div className="space-y-8">
+              {searchResults && (
+                <DetailsCard data={searchResults} type={searchType} />
+              )}
               {/* Add Checkbox Toggle */}
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -303,6 +411,7 @@ RETURN movie, actors`;
                   Show Cypher Query
                 </label>
               </div>
+
 
               {/* Conditionally Render CypherQueryDisplay */}
               {showCypherQuery && <CypherQueryDisplay query={currentQuery} />}

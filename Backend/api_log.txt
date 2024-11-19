@@ -10,3 +10,7 @@
 2024-10-03 21:08:31,031 - INFO - Actor added to Neo4j with filmography: John Cena
 2024-10-03 21:08:32,105 - INFO - Actor added to Neo4j with filmography: John Cena
 2024-10-03 21:08:33,120 - INFO - Actor added to Neo4j with filmography: John Cena
+2024-11-20 02:55:40,208 - INFO - Actor added to Neo4j with filmography: Jensen Ackles
+2024-11-20 03:01:52,819 - INFO - Actor added to Neo4j with filmography: Jared Padalecki
+2024-11-20 03:02:48,663 - INFO - Actor added to Neo4j with filmography: Dwayne Johnson
+2024-11-20 03:02:49,487 - INFO - Actor added to Neo4j with filmography: Dwayne Johnson

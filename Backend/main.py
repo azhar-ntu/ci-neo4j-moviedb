@@ -76,6 +76,7 @@ class Actor(BaseModel):
     date_of_birth: Optional[str] = None
     gender: Optional[str] = None
     date_of_death: Optional[str] = None
+    profile_path: Optional[str] = None
 
 class Movie(BaseModel):
     title: str
@@ -213,8 +214,9 @@ def fetch_actor_from_tmdb(actor_name):
     if data["results"]:
         actor_data = data["results"][0]
         actor_id = actor_data["id"]
+        profile_path = actor_data.get("profile_path")  # Get profile path from search results
 
-        # Fetch detailed actor info including movie credits
+        # Fetch detailed actor info
         details_url = f"{TMDB_BASE_URL}/person/{actor_id}"
         params = {
             "api_key": TMDB_API_KEY,
@@ -223,7 +225,6 @@ def fetch_actor_from_tmdb(actor_name):
         response = requests.get(details_url, params=params)
         actor_details = response.json()
 
-        # Extract filmography
         filmography = []
         for movie in actor_details.get('movie_credits', {}).get('cast', []):
             if movie.get('release_date'):
@@ -238,16 +239,18 @@ def fetch_actor_from_tmdb(actor_name):
             "date_of_birth": actor_details.get("birthday"),
             "gender": "Male" if actor_details["gender"] == 2 else "Female",
             "date_of_death": actor_details.get("deathday"),
+            "profile_path": profile_path,  # Add profile path to return data
             "filmography": filmography
         }
     return None
 
 def add_actor_to_neo4j(actor_data):
     actor_node = Node("Actor", 
-                      name=actor_data['name'],
-                      date_of_birth=actor_data['date_of_birth'],
-                      gender=actor_data['gender'],
-                      date_of_death=actor_data['date_of_death'])
+                     name=actor_data['name'],
+                     date_of_birth=actor_data['date_of_birth'],
+                     gender=actor_data['gender'],
+                     date_of_death=actor_data['date_of_death'],
+                     profile_path=actor_data['profile_path'])  # Add profile path to node
     graph.merge(actor_node, "Actor", "name")
 
     for movie in actor_data['filmography']:
