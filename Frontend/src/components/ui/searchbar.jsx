@@ -36,7 +36,7 @@ const SearchBar = ({
     }
   }, [cleanupLoading]);
 
-  const fetchSuggestions = useCallback(async (query) => {
+  const fetchResults = useCallback(async (query) => {
     if (!query || query.length < 2) {
       setSuggestions([]);
       return;
@@ -48,15 +48,16 @@ const SearchBar = ({
     safeSetLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:10000/autocomplete/${searchType}?query=${encodeURIComponent(query)}`
+        `http://localhost:10000/search/${searchType}?query=${encodeURIComponent(query)}`
       );
       
       if (response.ok) {
         const data = await response.json();
+        // Keep the full data object for movies to access the year
         setSuggestions(data);
       }
     } catch (error) {
-      console.error('Error fetching suggestions:', error);
+      console.error('Error fetching results:', error);
       setSuggestions([]);
     } finally {
       safeSetLoading(false);
@@ -76,16 +77,21 @@ const SearchBar = ({
   }, [setSearchQuery]);
 
   const handleSuggestionClick = useCallback((suggestion) => {
-    setSearchQuery(suggestion);
+    const suggestionText = searchType === 'movie' ? suggestion.title : suggestion.name;
+    setSearchQuery(suggestionText);
     setSuggestions([]);
     setShowSuggestions(false);
-    onSearch(suggestion);
-  }, [setSearchQuery, onSearch]);
+    onSearch(suggestionText);
+  }, [setSearchQuery, onSearch, searchType]);
 
   const handleSearchClick = useCallback(() => {
     setShowSuggestions(false);
-    onSearch();
-  }, [onSearch]);
+    if (suggestions.length > 0) {
+      onSearch(searchQuery, suggestions);
+    } else {
+      onSearch(searchQuery);
+    }
+  }, [onSearch, searchQuery, suggestions]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -98,25 +104,52 @@ const SearchBar = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery) {
+        fetchResults(searchQuery);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, fetchResults]);
+
   const renderSuggestions = useMemo(() => {
     if (!showSuggestions || !suggestions.length) return null;
 
     return (
-      <Card className="absolute w-full mt-1 z-50 max-h-60 overflow-y-auto shadow-lg">
-        <ul className="py-1">
-          {suggestions.map((suggestion, index) => (
-            <li
-              key={index}
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-              onClick={() => handleSuggestionClick(suggestion)}
-            >
-              {suggestion}
-            </li>
-          ))}
-        </ul>
+      <Card className="absolute w-full mt-1 z-50 shadow-lg">
+        <div className="max-h-[60vh] overflow-y-auto">
+          <ul className="py-1">
+            {suggestions.map((suggestion, index) => {
+              const displayText = searchType === 'movie' 
+                ? `${suggestion.title}${suggestion.year ? ` (${suggestion.year})` : ''}`
+                : suggestion.name;
+
+              return (
+                <li
+                  key={index}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      {searchType === 'actor' ? (
+                        <User className="w-4 h-4 mr-2 text-gray-500" />
+                      ) : (
+                        <Film className="w-4 h-4 mr-2 text-gray-500" />
+                      )}
+                      <span className="truncate">{displayText}</span>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </Card>
     );
-  }, [showSuggestions, suggestions, handleSuggestionClick]);
+  }, [showSuggestions, suggestions, searchType, handleSuggestionClick]);
 
   return (
     <div className="flex gap-4 mb-8 relative">

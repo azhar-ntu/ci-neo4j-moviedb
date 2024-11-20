@@ -45,3 +45,6 @@
 2024-11-20 10:08:16,053 - INFO - Actor added to Neo4j with filmography: Liam Hemsworth
 2024-11-20 10:08:17,243 - INFO - Actor added to Neo4j with filmography: Liam Hemsworth
 2024-11-20 10:15:47,553 - INFO - Actor added to Neo4j with filmography: Michael Jackson
+2024-11-20 10:16:41,471 - INFO - Actor added to Neo4j with filmography: Justin Timberlake
+2024-11-20 10:19:56,049 - INFO - Actor added to Neo4j with filmography: Justin Bieber
+2024-11-20 10:22:08,179 - INFO - Actor added to Neo4j with filmography: Selena Gomez

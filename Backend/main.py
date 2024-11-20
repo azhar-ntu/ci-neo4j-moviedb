@@ -56,18 +56,61 @@ async def autocomplete(search_type: str, query: str = Query(..., min_length=1)):
     if search_type not in ['actor', 'movie']:
         raise HTTPException(status_code=400, detail="Invalid search type")
     
-    cypher_query = """
+    # Define label based on search type
+    label = 'Actor' if search_type == 'actor' else 'Movie'
+    property_name = 'name' if search_type == 'actor' else 'title'
+    
+    # Modified Cypher query to handle both exact and partial matches
+    cypher_query = f"""
     MATCH (n:{label})
-    WHERE n.name =~ $regex
-    RETURN n.name AS name
-    LIMIT 5
-    """.format(label='Actor' if search_type == 'actor' else 'Movie')
+    WHERE toLower(n.{property_name}) CONTAINS toLower($query)
+    WITH n, 
+         CASE WHEN toLower(n.{property_name}) = toLower($query) THEN 0
+              WHEN toLower(n.{property_name}) STARTS WITH toLower($query) THEN 1
+              ELSE 2 END as relevance
+    ORDER BY relevance, n.{property_name}
+    RETURN n.{property_name} AS name, relevance
+    LIMIT 10
+    """
     
-    regex = f"(?i).*{re.escape(query)}.*"
-    results = graph.run(cypher_query, regex=regex).data()
-    
-    return [result['name'] for result in results]
+    try:
+        results = graph.run(cypher_query, query=query).data()
+        
+        # Format results
+        suggestions = [result['name'] for result in results]
+        return suggestions
+        
+    except Exception as e:
+        logging.error(f"Error in autocomplete: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
+@app.get("/search/{search_type}")
+async def search(search_type: str, query: str = Query(..., min_length=1)):
+    if search_type not in ['actor', 'movie']:
+        raise HTTPException(status_code=400, detail="Invalid search type")
+    
+    label = 'Actor' if search_type == 'actor' else 'Movie'
+    property_name = 'name' if search_type == 'actor' else 'title'
+    
+    cypher_query = f"""
+    MATCH (n:{label})
+    WHERE toLower(n.{property_name}) CONTAINS toLower($query)
+    WITH n,
+         CASE WHEN toLower(n.{property_name}) = toLower($query) THEN 0
+              WHEN toLower(n.{property_name}) STARTS WITH toLower($query) THEN 1
+              ELSE 2 END as relevance
+    ORDER BY relevance, n.{property_name}
+    RETURN n
+    LIMIT 20
+    """
+    
+    try:
+        results = graph.run(cypher_query, query=query).data()
+        return [dict(result['n']) for result in results]
+    except Exception as e:
+        logging.error(f"Error in search: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+    
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     return get_html_content()
