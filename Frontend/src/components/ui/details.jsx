@@ -1,10 +1,83 @@
 import { useState, useEffect } from 'react';
-import { Film, User } from 'lucide-react';
+import { Film, User, RefreshCw, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
-const DetailsCard = ({ data, type }) => {
+// Simple Notification component
+const Notification = ({ message, type, onClose }) => (
+  <div className={`
+    fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center gap-2
+    ${type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
+  `}>
+    <span>{message}</span>
+    <button 
+      onClick={onClose}
+      className="p-1 hover:bg-white/20 rounded-full"
+    >
+      <X className="w-4 h-4" />
+    </button>
+  </div>
+);
+
+const DetailsCard = ({ data, type, onDataUpdate }) => {
   const [posterUrl, setPosterUrl] = useState(null);
   const [isLoadingPoster, setIsLoadingPoster] = useState(false);
+  const [isUpdatingActor, setIsUpdatingActor] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [actorData, setActorData] = useState(data);
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  };
+
+  // Refresh actor data from backend
+  const refreshActorData = async (actorName) => {
+    try {
+      const response = await fetch(
+        `http://localhost:10000/actors/${encodeURIComponent(actorName)}/filmography`
+      );
+      if (response.ok) {
+        const newData = await response.json();
+        setActorData(newData);
+        if (onDataUpdate) {
+          onDataUpdate(newData);
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing actor data:', error);
+    }
+  };
+
+  const updateActorData = async (actorName) => {
+    setIsUpdatingActor(true);
+    try {
+      // First update the actor data in TMDB
+      const updateResponse = await fetch(
+        `http://localhost:10000/actor/update/${encodeURIComponent(actorName)}`
+      );
+      
+      if (updateResponse.ok) {
+        // Then refresh the actor data from our database
+        await refreshActorData(actorName);
+        showNotification('Actor information updated successfully');
+      } else {
+        throw new Error('Failed to update actor information');
+      }
+    } catch (error) {
+      console.error('Error updating actor data:', error);
+      showNotification('Failed to update actor information', 'error');
+    } finally {
+      setIsUpdatingActor(false);
+    }
+  };
+
+  // Update local state when props change
+  useEffect(() => {
+    setActorData(data);
+  }, [data]);
 
   useEffect(() => {
     const fetchMoviePoster = async () => {
@@ -64,8 +137,8 @@ const DetailsCard = ({ data, type }) => {
   if (!data) return null;
 
   // Actor Card
-  if (type === 'actor' && data.actor && data.movies) {
-    const { actor, movies } = data;
+  if (type === 'actor' && actorData?.actor && actorData?.movies) {
+    const { actor, movies } = actorData;
     const imageUrl = actor?.profile_path ? 
       `https://image.tmdb.org/t/p/w185${actor.profile_path}` : 
       null;
@@ -74,77 +147,113 @@ const DetailsCard = ({ data, type }) => {
     const sortedMovies = [...movies].sort((a, b) => (b.year || '0') - (a.year || '0'));
     
     return (
-      <Card className="mb-4">
-        <CardContent className="p-6">
-          <div className="flex gap-6">
-            <div className="flex-shrink-0 w-32 h-40">
-              {imageUrl ? (
-                <img
-                  src={imageUrl}
-                  alt={actor.name}
-                  className="w-full h-full object-cover rounded-lg shadow-md"
-                />
-              ) : (
-                <div className="w-full h-full bg-gray-200 rounded-lg shadow-md flex items-center justify-center">
-                  <User className="w-12 h-12 text-gray-400" />
-                </div>
-              )}
-            </div>
-            
-            <div className="flex-1">
-              <div className="flex justify-between items-start mb-4">
-                <div className="space-y-2">
-                  <h2 className="text-2xl font-bold">{actor.name}</h2>
-                  <div className="space-y-1 text-sm">
-                    {actor.gender && (
-                      <p className="text-gray-600">
-                        <span className="font-medium">Gender:</span> {actor.gender}
-                      </p>
-                    )}
-                    {actor.date_of_birth && (
-                      <p className="text-gray-600">
-                        <span className="font-medium">Born:</span> {formatDate(actor.date_of_birth)}
-                        {age && ` (${age} years${actor.date_of_death ? ' old at death' : ' old'})`}
-                      </p>
-                    )}
-                    {actor.date_of_death && (
-                      <p className="text-gray-600">
-                        <span className="font-medium">Died:</span> {formatDate(actor.date_of_death)}
-                      </p>
+      <>
+        {notification && (
+          <Notification
+            message={notification.message}
+            type={notification.type}
+            onClose={() => setNotification(null)}
+          />
+        )}
+        
+        <Card className="mb-4">
+          <CardContent className="p-6">
+            <div className="flex gap-6">
+              <div className="flex-shrink-0 w-32 h-40 relative">
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={actor.name}
+                    className="w-full h-full object-cover rounded-lg shadow-md"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 rounded-lg shadow-md flex flex-col items-center justify-center gap-2">
+                    <User className="w-12 h-12 text-gray-400" />
+                    {!isUpdatingActor ? (
+                      <button 
+                        onClick={() => updateActorData(actor.name)}
+                        className="px-2 py-1 text-xs text-gray-600 hover:text-gray-900 flex items-center gap-1
+                                 bg-white/50 hover:bg-white/80 rounded transition-colors"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        Update Info
+                      </button>
+                    ) : (
+                      <div className="animate-spin">
+                        <RefreshCw className="w-4 h-4 text-gray-400" />
+                      </div>
                     )}
                   </div>
-                </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-sm text-gray-500">Movies</span>
-                  <span className="font-medium text-lg">{movies.length}</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-sm mt-4">
-                {sortedMovies.length > 0 && (
-                  <>
-                    <div>
-                      <span className="text-gray-500">Latest Movie</span>
-                      <p className="font-medium">
-                        {sortedMovies[0].title} 
-                        {sortedMovies[0].year && ` (${sortedMovies[0].year})`}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">First Movie</span>
-                      <p className="font-medium">
-                        {sortedMovies[sortedMovies.length - 1].title}
-                        {sortedMovies[sortedMovies.length - 1].year && 
-                          ` (${sortedMovies[sortedMovies.length - 1].year})`}
-                      </p>
-                    </div>
-                  </>
                 )}
               </div>
+              
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">{actor.name}</h2>
+                      {!imageUrl && !isUpdatingActor && (
+                        <button 
+                          onClick={() => updateActorData(actor.name)}
+                          className="px-2 py-1 text-xs text-gray-600 hover:text-gray-900 flex items-center gap-1
+                                   bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                        >
+                          <RefreshCw className="w-3 h-3" />
+                          Update
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-1 text-sm">
+                      {actor.gender && (
+                        <p className="text-gray-600">
+                          <span className="font-medium">Gender:</span> {actor.gender}
+                        </p>
+                      )}
+                      {actor.date_of_birth && (
+                        <p className="text-gray-600">
+                          <span className="font-medium">Born:</span> {formatDate(actor.date_of_birth)}
+                          {age && ` (${age} years${actor.date_of_death ? ' old at death' : ' old'})`}
+                        </p>
+                      )}
+                      {actor.date_of_death && (
+                        <p className="text-gray-600">
+                          <span className="font-medium">Died:</span> {formatDate(actor.date_of_death)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-sm text-gray-500">Movies</span>
+                    <span className="font-medium text-lg">{movies.length}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm mt-4">
+                  {sortedMovies.length > 0 && (
+                    <>
+                      <div>
+                        <span className="text-gray-500">Latest Movie</span>
+                        <p className="font-medium">
+                          {sortedMovies[0].title} 
+                          {sortedMovies[0].year && ` (${sortedMovies[0].year})`}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">First Movie</span>
+                        <p className="font-medium">
+                          {sortedMovies[sortedMovies.length - 1].title}
+                          {sortedMovies[sortedMovies.length - 1].year && 
+                            ` (${sortedMovies[sortedMovies.length - 1].year})`}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </>
     );
   }
 
