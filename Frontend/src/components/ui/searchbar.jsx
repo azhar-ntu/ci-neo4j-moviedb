@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Search, User, Film } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -13,9 +13,28 @@ const SearchBar = ({
 }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const debounceTimer = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
   const lastQuery = useRef(searchQuery);
+  const loadingTimeoutRef = useRef(null);
+  const wrapperRef = useRef(null);
+
+  const cleanupLoading = useCallback(() => {
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+  }, []);
+
+  const safeSetLoading = useCallback((value) => {
+    cleanupLoading();
+    if (value) {
+      loadingTimeoutRef.current = setTimeout(() => {
+        setIsLoading(true);
+      }, 100);
+    } else {
+      setIsLoading(false);
+    }
+  }, [cleanupLoading]);
 
   const fetchSuggestions = useCallback(async (query) => {
     if (!query || query.length < 2) {
@@ -23,11 +42,10 @@ const SearchBar = ({
       return;
     }
 
-    // Prevent duplicate fetches
     if (query === lastQuery.current) return;
     lastQuery.current = query;
 
-    setLoading(true);
+    safeSetLoading(true);
     try {
       const response = await fetch(
         `http://localhost:10000/autocomplete/${searchType}?query=${encodeURIComponent(query)}`
@@ -39,45 +57,36 @@ const SearchBar = ({
       }
     } catch (error) {
       console.error('Error fetching suggestions:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [searchType]);
-
-  // Debounced search effect
-  useEffect(() => {
-    if (!searchQuery || searchQuery.length < 2) {
       setSuggestions([]);
-      return;
+    } finally {
+      safeSetLoading(false);
     }
+  }, [searchType, safeSetLoading]);
 
-    const timer = setTimeout(() => {
-      fetchSuggestions(searchQuery);
-    }, 300);
+  useEffect(() => {
+    return () => {
+      cleanupLoading();
+    };
+  }, [cleanupLoading]);
 
-    return () => clearTimeout(timer);
-  }, [searchQuery, fetchSuggestions]);
-
-  const handleInputChange = (e) => {
+  const handleInputChange = useCallback((e) => {
     const value = e.target.value;
     setSearchQuery(value);
     setShowSuggestions(true);
-  };
+  }, [setSearchQuery]);
 
-  const handleSuggestionClick = (suggestion) => {
+  const handleSuggestionClick = useCallback((suggestion) => {
     setSearchQuery(suggestion);
     setSuggestions([]);
     setShowSuggestions(false);
     onSearch(suggestion);
-  };
+  }, [setSearchQuery, onSearch]);
 
-  const handleSearchClick = () => {
+  const handleSearchClick = useCallback(() => {
     setShowSuggestions(false);
     onSearch();
-  };
+  }, [onSearch]);
 
-  // Handle click outside to close suggestions
-  const wrapperRef = useRef(null);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -86,10 +95,28 @@ const SearchBar = ({
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const renderSuggestions = useMemo(() => {
+    if (!showSuggestions || !suggestions.length) return null;
+
+    return (
+      <Card className="absolute w-full mt-1 z-50 max-h-60 overflow-y-auto shadow-lg">
+        <ul className="py-1">
+          {suggestions.map((suggestion, index) => (
+            <li
+              key={index}
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+              onClick={() => handleSuggestionClick(suggestion)}
+            >
+              {suggestion}
+            </li>
+          ))}
+        </ul>
+      </Card>
+    );
+  }, [showSuggestions, suggestions, handleSuggestionClick]);
 
   return (
     <div className="flex gap-4 mb-8 relative">
@@ -107,24 +134,9 @@ const SearchBar = ({
           className="w-full"
         />
         
-        {/* Suggestions dropdown */}
-        {showSuggestions && suggestions.length > 0 && (
-          <Card className="absolute w-full mt-1 z-50 max-h-60 overflow-y-auto shadow-lg">
-            <ul className="py-1">
-              {suggestions.map((suggestion, index) => (
-                <li
-                  key={index}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => handleSuggestionClick(suggestion)}
-                >
-                  {suggestion}
-                </li>
-              ))}
-            </ul>
-          </Card>
-        )}
+        {renderSuggestions}
         
-        {loading && (
+        {isLoading && (
           <div className="absolute right-3 top-2.5">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900"></div>
           </div>
@@ -156,4 +168,4 @@ const SearchBar = ({
   );
 };
 
-export {SearchBar };
+export { SearchBar };
