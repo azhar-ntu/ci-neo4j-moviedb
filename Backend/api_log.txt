@@ -50,3 +50,4 @@
 2024-11-20 10:22:08,179 - INFO - Actor added to Neo4j with filmography: Selena Gomez
 2024-11-20 10:46:59,508 - INFO - Actor deleted: Robert Downey Jr.
 2024-11-20 10:47:06,755 - INFO - Actor added to Neo4j with filmography: Robert Downey Jr.
+2024-11-20 10:50:16,234 - INFO - Actor deleted: Sean Connery

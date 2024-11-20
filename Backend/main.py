@@ -458,38 +458,84 @@ async def get_movie_cast(title: str):
         ]
     }
 
-# @app.get("/actors/{name}/filmography")
-# async def get_actor_filmography(name: str):
-    cypher_query = """
-    MATCH (a:Actor {name: $name})-[:ACTED_IN]->(m:Movie)
-    WITH a as actor, m
-    ORDER BY m.year DESC, m.title
-    WITH actor, collect(m) as movies
-    RETURN actor, movies
-    """
-    
-    result = graph.run(cypher_query, name=name).data()
-    
-    if not result or not result[0]['actor']:
-        raise HTTPException(status_code=404, detail="Actor not found")
+@app.get("/movie/poster/{title}")
+async def get_movie_poster(title: str):
+    try:
+        # Search for movie in TMDB
+        search_url = f"{TMDB_BASE_URL}/search/movie"
+        params = {
+            "api_key": TMDB_API_KEY,
+            "query": title,
+            "year": None  # You could add year if available for more accurate results
+        }
         
-    actor_data = result[0]['actor']
-    movies_data = result[0]['movies']
-    
-    return {
-        "actor": {
-            "name": actor_data["name"],
-            "date_of_birth": actor_data.get("date_of_birth"),
-            "gender": actor_data.get("gender")
-        },
-        "movies": [
-            {
-                "title": movie["title"],
-                "year": movie.get("year")
-            } for movie in movies_data
-        ]
-    }
+        response = requests.get(search_url, params=params)
+        data = response.json()
+        
+        if data["results"]:
+            # Return the first result's poster path
+            return {
+                "poster_path": data["results"][0]["poster_path"],
+                "tmdb_id": data["results"][0]["id"]
+            }
+        else:
+            return {"poster_path": None, "tmdb_id": None}
+            
+    except Exception as e:
+        logging.error(f"Error fetching movie poster: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/actor/update/{name}")
+async def update_actor_data(name: str):
+    try:
+        # Search for actor in TMDB
+        search_url = f"{TMDB_BASE_URL}/search/person"
+        params = {
+            "api_key": TMDB_API_KEY,
+            "query": name
+        }
+        response = requests.get(search_url, params=params)
+        data = response.json()
+
+        if data["results"]:
+            actor_data = data["results"][0]
+            actor_id = actor_data["id"]
+            
+            # Fetch detailed actor info
+            details_url = f"{TMDB_BASE_URL}/person/{actor_id}"
+            params = {
+                "api_key": TMDB_API_KEY,
+                "append_to_response": "movie_credits"
+            }
+            details_response = requests.get(details_url, params=params)
+            actor_details = details_response.json()
+            
+            # Update actor in Neo4j
+            cypher_query = """
+            MATCH (a:Actor {name: $name})
+            SET a.profile_path = $profile_path,
+                a.gender = CASE WHEN $gender = 2 THEN 'Male' WHEN $gender = 1 THEN 'Female' ELSE a.gender END,
+                a.date_of_birth = COALESCE($birthday, a.date_of_birth),
+                a.date_of_death = COALESCE($deathday, a.date_of_death)
+            RETURN a
+            """
+            
+            result = graph.run(cypher_query, {
+                'name': name,
+                'profile_path': actor_data.get('profile_path'),
+                'gender': actor_details.get('gender'),
+                'birthday': actor_details.get('birthday'),
+                'deathday': actor_details.get('deathday')
+            }).data()
+
+            if result:
+                return result[0]['a']
+            
+        return {"message": "No updates available"}
+            
+    except Exception as e:
+        logging.error(f"Error updating actor data: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 @app.get("/health")
 async def health_check():
     try:
