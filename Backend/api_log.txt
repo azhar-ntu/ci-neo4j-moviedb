@@ -56,3 +56,8 @@
 2024-11-20 11:02:31,932 - INFO - Actor added to Neo4j with filmography: Ralph Macchio
 2024-11-20 11:03:30,135 - INFO - Actor added to Neo4j with filmography: William Zabka
 2024-11-21 19:54:11,314 - INFO - Actor added to Neo4j with filmography: Johnny Depp
+2024-11-21 20:01:04,235 - INFO - Actor added to Neo4j with filmography: Robin Williams
+2024-11-21 20:01:37,850 - INFO - Actor added to Neo4j with filmography: Kirsten Dunst
+2024-11-21 20:19:56,219 - INFO - Actor added to Neo4j with filmography: Will Smith
+2024-11-21 20:53:45,906 - INFO - Actor added to Neo4j with filmography: John Travolta
+2024-11-21 20:58:13,652 - INFO - Actor added to Neo4j with filmography: Tobey Maguire

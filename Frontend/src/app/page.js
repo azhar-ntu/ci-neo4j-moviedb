@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, Suspense } from "react";
 import { Search, User, Film } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -109,7 +109,7 @@ const NotFoundMessage = ({ type, query, onAddActor }) => (
 export default function Home() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const ForceGraphRef = useRef();
+    const ForceGraphRef = useRef();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchType, setSearchType] = useState("actor");
@@ -211,9 +211,40 @@ export default function Home() {
 
     router.push("/", { scroll: false });
   };
+  // Add effect to handle browser navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const query = params.get("q");
+      const type = params.get("type");
 
+      if (query) {
+        setSearchQuery(query);
+        setSearchType(type || "actor");
+        handleSearch(query, type || "actor");
+      } else {
+        // Reset state when navigating to empty URL
+        setSearchQuery("");
+        setSearchType("actor");
+        setSelectedNode(null);
+        setSearchResults(null);
+        setGraphData({ nodes: [], links: [] });
+        setCurrentQuery("");
+        setNotFound(false);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+  
   const handleSearch = async (query = searchQuery, type = searchType) => {
     if (!query.trim()) return;
+
+    const params = new URLSearchParams();
+    params.set("q", query);
+    params.set("type", type);
+    window.history.pushState({}, "", `/?${params.toString()}`);
 
     setLoading(true);
     setError(null);
@@ -330,13 +361,15 @@ RETURN movie, actors`;
           <CardTitle>Movie Database Explorer</CardTitle>
         </CardHeader>
         <CardContent>
-          <SearchBar
-            searchQuery={searchQuery}
+          <Suspense>
+            <SearchBar
+              searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             searchType={searchType}
             onSearch={(suggestion) => handleSearch(suggestion || searchQuery)}
             onTypeChange={handleTypeChange}
           />
+          </Suspense>
 
           {error && (
             <div className="text-red-500 mb-4 p-4 bg-red-50 rounded-lg">
