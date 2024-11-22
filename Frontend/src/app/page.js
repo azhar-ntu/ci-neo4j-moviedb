@@ -153,22 +153,25 @@ export default function Home() {
         id: data.actor.name,
         name: data.actor.name,
         type: "actor",
-        val: 20,
+        val: 45,
+        collisionRadius: 80
       });
 
-      // Add movie nodes and connections
-      data.movies.forEach((movie) => {
+      // Add movie nodes and connections (limit to first 29 movies)
+      data.movies.slice(0, 29).forEach((movie) => {
         nodes.push({
           id: movie.title,
           name: movie.title,
           type: "movie",
-          val: 15,
+          val: 40,
           year: movie.year,
+          collisionRadius: 75
         });
 
         links.push({
           source: data.actor.name,
           target: movie.title,
+          distance: 500
         });
       });
     } else if (type === "movie" && data?.movie && data?.actors) {
@@ -177,22 +180,25 @@ export default function Home() {
         id: data.movie.title,
         name: data.movie.title,
         type: "movie",
-        val: 20,
+        val: 45,
         year: data.movie.year,
+        collisionRadius: 80
       });
 
-      // Add actor nodes and connections
-      data.actors.forEach((actor) => {
+      // Add actor nodes and connections (limit to first 29 actors)
+      data.actors.slice(0, 29).forEach((actor) => {
         nodes.push({
           id: actor.name,
           name: actor.name,
           type: "actor",
-          val: 15,
+          val: 40,
+          collisionRadius: 75
         });
 
         links.push({
           source: data.movie.title,
           target: actor.name,
+          distance: 500
         });
       });
     }
@@ -423,9 +429,9 @@ RETURN movie, actors`;
                       ? "#ff6b6b"
                       : "#4ecdc4"
                   }
-                  width={window.innerWidth * 0.65} // Reduced from 0.8 to 0.65
+                  width={window.innerWidth * 0.65}
                   height={600}
-                  centerAt={[window.innerWidth * 0.3, 300]} // Wrapped in array brackets
+                  centerAt={[window.innerWidth * 0.25, 300]}
                   nodeRelSize={8}
                   linkWidth={2}
                   linkColor={() => "#cbd5e1"}
@@ -500,13 +506,13 @@ RETURN movie, actors`;
                     const graphWidth = graphBounds.x.max - graphBounds.x.min;
                     const graphHeight = graphBounds.y.max - graphBounds.y.min;
                     const graphCenter = {
-                      x: (graphBounds.x.min + graphWidth / 2) * 0.8, // Added multiplier to shift left
+                      x: (graphBounds.x.min + graphWidth / 2) * 0.6,
                       y: graphBounds.y.min + graphHeight / 2,
                     };
 
                     const zoomLevel =
                       Math.min(
-                        (window.innerWidth * 0.65) / graphWidth, // Updated to match new width
+                        (window.innerWidth * 0.65) / graphWidth,
                         600 / graphHeight
                       ) * 0.9;
 
@@ -530,6 +536,9 @@ RETURN movie, actors`;
                   <span>Movies</span>
                 </div>
               </div>
+              <p className="text-sm text-gray-500 mt-2 text-center italic">
+                  * Graph visualization shows only the first 25 connections for better readability. See complete list below.
+                </p>
               {/* Results List */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between px-2">

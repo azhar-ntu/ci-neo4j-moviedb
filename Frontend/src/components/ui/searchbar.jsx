@@ -53,8 +53,12 @@ const SearchBar = ({
       
       if (response.ok) {
         const data = await response.json();
-        // Keep the full data object for movies to access the year
-        setSuggestions(data);
+        // Filter out undefined or empty entries
+        const validSuggestions = data.filter(suggestion => {
+          const text = searchType === 'movie' ? suggestion.title : suggestion.name;
+          return text && text.trim().length > 0;
+        });
+        setSuggestions(validSuggestions);
       }
     } catch (error) {
       console.error('Error fetching results:', error);
@@ -123,8 +127,10 @@ const SearchBar = ({
           <ul className="py-1">
             {suggestions.map((suggestion, index) => {
               const displayText = searchType === 'movie' 
-                ? `${suggestion.title}${suggestion.year ? ` (${suggestion.year})` : ''}`
+                ? (suggestion.title && suggestion.year ? `${suggestion.title} (${suggestion.year})` : suggestion.title)
                 : suggestion.name;
+                
+              if (!displayText) return null;
 
               return (
                 <li
