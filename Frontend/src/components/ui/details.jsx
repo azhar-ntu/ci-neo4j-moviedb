@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Film, User, RefreshCw, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { apiService } from '@/lib/api-config';
 
 // Simple Notification component
 const Notification = ({ message, type, onClose }) => (
@@ -36,8 +37,8 @@ const DetailsCard = ({ data, type, onDataUpdate }) => {
   // Refresh actor data from backend
   const refreshActorData = async (actorName) => {
     try {
-      const response = await fetch(
-        `http://localhost:10000/actors/${encodeURIComponent(actorName)}/filmography`
+      const response = await apiService.fetchData(
+        `/actors/${encodeURIComponent(actorName)}/filmography`
       );
       if (response.ok) {
         const newData = await response.json();
@@ -54,13 +55,11 @@ const DetailsCard = ({ data, type, onDataUpdate }) => {
   const updateActorData = async (actorName) => {
     setIsUpdatingActor(true);
     try {
-      // First update the actor data in TMDB
-      const updateResponse = await fetch(
-        `http://localhost:10000/actor/update/${encodeURIComponent(actorName)}`
+      const updateResponse = await apiService.postData(
+        `/actor/update/${encodeURIComponent(actorName)}`
       );
       
       if (updateResponse.ok) {
-        // Then refresh the actor data from our database
         await refreshActorData(actorName);
         showNotification('Actor information updated successfully');
       } else {
@@ -85,8 +84,8 @@ const DetailsCard = ({ data, type, onDataUpdate }) => {
 
       setIsLoadingPoster(true);
       try {
-        const response = await fetch(
-          `http://localhost:10000/movie/poster/${encodeURIComponent(data.movie.title)}`
+        const response = await apiService.fetchData(
+          `/movie/poster/${encodeURIComponent(data.movie.title)}`
         );
         
         if (response.ok) {

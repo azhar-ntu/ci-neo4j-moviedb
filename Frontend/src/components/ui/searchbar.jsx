@@ -3,6 +3,7 @@ import { Search, User, Film } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { apiService } from '@/lib/api-config';
 
 const SearchBar = ({ 
   searchQuery, 
@@ -47,8 +48,8 @@ const SearchBar = ({
 
     safeSetLoading(true);
     try {
-      const response = await fetch(
-        `http://localhost:10000/search/${searchType}?query=${encodeURIComponent(query)}`
+      const response = await apiService.fetchData(
+        `/search/${searchType}?query=${encodeURIComponent(query)}`
       );
       
       if (response.ok) {

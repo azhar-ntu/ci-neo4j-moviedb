@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SearchBar } from "@/components/ui/searchbar";
 import { DetailsCard } from "@/components/ui/details";
+import { apiService } from "@/lib/api-config";
 
 // Dynamically import ForceGraph2D to avoid SSR issues
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
@@ -60,13 +61,8 @@ const capitalizeFirstLetter = (string) => {
 
 const addActorFromTMDB = async (actorName) => {
   try {
-    const response = await fetch(
-      `http://localhost:10000/add_actor_from_tmdb/${encodeURIComponent(
-        actorName
-      )}`,
-      {
-        method: "POST",
-      }
+    const response = await apiService.postData(
+      `/add_actor_from_tmdb/${encodeURIComponent(actorName)}`
     );
 
     if (!response.ok) {
@@ -277,8 +273,8 @@ RETURN movie, actors`;
     setCurrentQuery(cypherQuery);
 
     try {
-      const response = await fetch(
-        `http://localhost:10000/${type}s/${encodeURIComponent(query)}/${
+      const response = await apiService.fetchData(
+        `/${type}s/${encodeURIComponent(query)}/${
           type === "actor" ? "filmography" : "cast"
         }`
       );
