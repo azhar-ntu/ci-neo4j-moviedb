@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef, Suspense } from "react";
 import { Search, User, Film } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -108,8 +108,7 @@ const NotFoundMessage = ({ type, query, onAddActor }) => (
 
 export default function Home() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-    const ForceGraphRef = useRef();
+  const ForceGraphRef = useRef();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchType, setSearchType] = useState("actor");
@@ -125,8 +124,9 @@ export default function Home() {
 
   // Initialize state from URL on component mount
   useEffect(() => {
-    const query = searchParams.get("q");
-    const type = searchParams.get("type");
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get("q");
+    const type = params.get("type");
 
     if (query) {
       setSearchQuery(query);
