@@ -9,7 +9,7 @@ const getApiBaseUrl = () => {
     }
     // Check if deployed on Render.com
     if (window.location.hostname.endsWith('.onrender.com')) {
-      return 'https://ci-neo4j-moviedb.onrender.com';
+      return 'https://ci-neo4j-moviedb-backend.onrender.com';
     }
     return process.env.NEXT_PUBLIC_API_URL;
   };
