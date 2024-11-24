@@ -351,58 +351,73 @@ async def get_actor_filmography(name: str):
             } for movie in movies_data
         ]
     }
-@app.post("/actors/add")
-async def add_actor(actor: ActorCreate):
+@app.put("/actors/{name}", response_model=Actor)
+async def update_actor(name: str, actor: Optional[Actor] = None):
     try:
-        actor_node = Node("Actor", **actor.dict())
-        graph.create(actor_node)
-        logging.info(f"Actor added: {actor.name}")
-        return {"message": f"Actor {actor.name} added successfully"}
+        actor_node = matcher.match("Actor", name=name).first()
+        if not actor_node:
+            raise HTTPException(status_code=404, detail="Actor not found")
+
+        if actor:
+            # Update with provided data
+            actor_node.update(**actor.dict(exclude_unset=True))
+            graph.push(actor_node)
+        else:
+            # Update from TMDB
+            # Search for actor in TMDB
+            search_url = f"{TMDB_BASE_URL}/search/person"
+            params = {
+                "api_key": TMDB_API_KEY,
+                "query": name
+            }
+            response = requests.get(search_url, params=params)
+            data = response.json()
+
+            if not data["results"]:
+                return {"message": "No updates available from TMDB"}
+
+            actor_data = data["results"][0]
+            actor_id = actor_data["id"]
+            
+            # Fetch detailed actor info
+            details_url = f"{TMDB_BASE_URL}/person/{actor_id}"
+            params = {
+                "api_key": TMDB_API_KEY,
+                "append_to_response": "movie_credits"
+            }
+            details_response = requests.get(details_url, params=params)
+            actor_details = details_response.json()
+            
+            # Update actor in Neo4j
+            cypher_query = """
+            MATCH (a:Actor {name: $name})
+            SET a.profile_path = $profile_path,
+                a.gender = CASE WHEN $gender = 2 THEN 'Male' WHEN $gender = 1 THEN 'Female' ELSE a.gender END,
+                a.date_of_birth = COALESCE($birthday, a.date_of_birth),
+                a.date_of_death = COALESCE($deathday, a.date_of_death)
+            RETURN a
+            """
+            
+            result = graph.run(cypher_query, {
+                'name': name,
+                'profile_path': actor_data.get('profile_path'),
+                'gender': actor_details.get('gender'),
+                'birthday': actor_details.get('birthday'),
+                'deathday': actor_details.get('deathday')
+            }).data()
+
+            if result:
+                logging.info(f"Actor updated from TMDB: {name}")
+                return {
+                    "message": "Actor updated successfully",
+                    "data": result[0]['a']
+                }
+                
+            return {"message": "No updates available"}
+            
     except Exception as e:
-        logging.error(f"Error adding actor: {str(e)}")
+        logging.error(f"Error updating actor: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-
-# @app.get("/actors/{name}/filmography", response_model=Optional[ActorFilmography])
-# async def get_actor_filmography(name: str):
-#     cypher_query = """
-#     MATCH (a:Actor {name: $name})-[:ACTED_IN]->(m:Movie)
-#     RETURN a AS actor, collect(m) AS movies
-#     """
-#     result = graph.run(cypher_query, name=name).data()
-    
-#     if not result:
-#         return None
-    
-#     actor_data = result[0]['actor']
-#     movies_data = result[0]['movies']
-    
-#     return ActorFilmography(
-#         actor=Actor(**dict(actor_data)),
-#         movies=[Movie(**dict(movie)) for movie in movies_data]
-#     )
-
-# Search endpoints
-@app.get("/search/actors", response_model=List[Actor])
-async def search_actors(query: str = Query(..., min_length=1)):
-    cypher_query = """
-    MATCH (a:Actor)
-    WHERE a.name =~ $regex
-    RETURN a
-    """
-    regex = f"(?i).*{re.escape(query)}.*"
-    results = graph.run(cypher_query, regex=regex).data()
-    return [Actor(**dict(result['a'])) for result in results]
-
-@app.get("/search/movies", response_model=List[Movie])
-async def search_movies(query: str = Query(..., min_length=1)):
-    cypher_query = """
-    MATCH (m:Movie)
-    WHERE m.title =~ $regex
-    RETURN m
-    """
-    regex = f"(?i).*{re.escape(query)}.*"
-    results = graph.run(cypher_query, regex=regex).data()
-    return [Movie(**dict(result['m'])) for result in results]
 
 @app.get("/movies/{title}/cast")
 async def get_movie_cast(title: str):
@@ -476,68 +491,6 @@ async def get_movie_poster(title: str):
         logging.error(f"Error fetching movie poster: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/actor/update/{name}")
-async def update_actor_data(name: str):
-    try:
-        # First check if actor exists
-        actor_node = matcher.match("Actor", name=name).first()
-        if not actor_node:
-            raise HTTPException(status_code=404, detail="Actor not found")
-
-        # Search for actor in TMDB
-        search_url = f"{TMDB_BASE_URL}/search/person"
-        params = {
-            "api_key": TMDB_API_KEY,
-            "query": name
-        }
-        response = requests.get(search_url, params=params)
-        data = response.json()
-
-        if not data["results"]:
-            return {"message": "No updates available from TMDB"}
-
-        actor_data = data["results"][0]
-        actor_id = actor_data["id"]
-        
-        # Fetch detailed actor info
-        details_url = f"{TMDB_BASE_URL}/person/{actor_id}"
-        params = {
-            "api_key": TMDB_API_KEY,
-            "append_to_response": "movie_credits"
-        }
-        details_response = requests.get(details_url, params=params)
-        actor_details = details_response.json()
-        
-        # Update actor in Neo4j
-        cypher_query = """
-        MATCH (a:Actor {name: $name})
-        SET a.profile_path = $profile_path,
-            a.gender = CASE WHEN $gender = 2 THEN 'Male' WHEN $gender = 1 THEN 'Female' ELSE a.gender END,
-            a.date_of_birth = COALESCE($birthday, a.date_of_birth),
-            a.date_of_death = COALESCE($deathday, a.date_of_death)
-        RETURN a
-        """
-        
-        result = graph.run(cypher_query, {
-            'name': name,
-            'profile_path': actor_data.get('profile_path'),
-            'gender': actor_details.get('gender'),
-            'birthday': actor_details.get('birthday'),
-            'deathday': actor_details.get('deathday')
-        }).data()
-
-        if result:
-            logging.info(f"Actor updated from TMDB: {name}")
-            return {
-                "message": "Actor updated successfully",
-                "data": result[0]['a']
-            }
-            
-        return {"message": "No updates available"}
-            
-    except Exception as e:
-        logging.error(f"Error updating actor data: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
 @app.get("/health")
 async def health_check():
     try:
@@ -740,73 +693,7 @@ async def seed_actors():
     except Exception as e:
         logging.error(f"Error seeding actors: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-@app.get("/actors/{name}/costars")
-async def get_actor_costars(
-    name: str,
-    limit: int = Query(default=10, ge=1, le=100),
-    min_collaborations: int = Query(default=1, ge=1)
-):
-    """
-    Get actors who have previously worked with the specified actor.
-    
-    Parameters:
-    - name: Name of the actor to find costars for
-    - limit: Maximum number of costars to return (default: 10, max: 100)
-    - min_collaborations: Minimum number of shared movies required (default: 1)
-    
-    Returns:
-    - List of costars with collaboration details
-    """
-    cypher_query = """
-    MATCH (a:Actor {name: $name})-[:ACTED_IN]->(m:Movie)<-[:ACTED_IN]-(costar:Actor)
-    WHERE a <> costar
-    WITH costar, collect(DISTINCT m) as shared_movies, a
-    WHERE size(shared_movies) >= $min_collaborations
-    RETURN 
-        costar.name as name,
-        costar.profile_path as profile_path,
-        size(shared_movies) as collaboration_count,
-        [movie in shared_movies | {
-            title: movie.title,
-            year: movie.year
-        }] as movies
-    ORDER BY collaboration_count DESC, costar.name
-    LIMIT $limit
-    """
-    
-    try:
-        results = graph.run(cypher_query, {
-            'name': name,
-            'min_collaborations': min_collaborations,
-            'limit': limit
-        }).data()
-        
-        if not results:
-            raise HTTPException(
-                status_code=404,
-                detail=f"No costars found for actor '{name}' with minimum {min_collaborations} collaborations"
-            )
-            
-        return {
-            "actor": name,
-            "total_costars": len(results),
-            "costars": [{
-                "name": result["name"],
-                "profile_path": result["profile_path"],
-                "collaboration_count": result["collaboration_count"],
-                "shared_movies": sorted(
-                    result["movies"],
-                    key=lambda x: (x.get("year", ""), x["title"])
-                )
-            } for result in results]
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logging.error(f"Error getting costars for {name}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-    
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=10000)
