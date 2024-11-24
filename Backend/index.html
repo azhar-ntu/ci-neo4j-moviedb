@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Database Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        #search-input {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #search-type {
+            padding: 10px;
+            font-size: 16px;
+        }
+        #search-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #search-button:hover {
+            background-color: #45a049;
+        }
+        #results {
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .result-item {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .result-item h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .result-item p {
+            margin: 5px 0;
+        }
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+        }
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #fff; 
+            border-bottom: 1px solid #d4d4d4; 
+        }
+        .autocomplete-items div:hover {
+            background-color: #e9e9e9; 
+        }
+        .autocomplete-active {
+            background-color: DodgerBlue !important; 
+            color: #ffffff; 
+        }
+        .autocomplete {
+            position: relative;
+            display: inline-block;
+        }
+        #addActorBtn {
+            background-color: #008CBA;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Movie Database Search</h1>
+    <div class="search-container">
+        <div class="autocomplete" style="width:300px;">
+            <input type="text" id="search-input" placeholder="Enter actor or movie name">
+        </div>
+        <select id="search-type">
+            <option value="actor">Actor</option>
+            <option value="movie">Movie</option>
+        </select>
+        <button id="search-button">Search</button>
+    </div>
+    <div id="results"></div>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const searchType = document.getElementById('search-type');
+        const searchButton = document.getElementById('search-button');
+        const resultsContainer = document.getElementById('results');
+
+        const API_BASE_URL = '';  // Empty string for relative URLs
+
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('input', debounce(handleAutocomplete, 300));
+
+        function debounce(func, delay) {
+            let debounceTimer;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => func.apply(context, args), delay);
+            }
+        }
+
+        async function handleAutocomplete() {
+            const query = searchInput.value.trim();
+            const type = searchType.value;
+
+            if (query.length < 2) {
+                closeAllLists();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/autocomplete/${type}?query=${encodeURIComponent(query)}`);
+                const suggestions = await response.json();
+                
+                let autocompleteList = document.getElementById(searchInput.id + "autocomplete-list");
+                if (!autocompleteList) {
+                    autocompleteList = document.createElement("DIV");
+                    autocompleteList.setAttribute("id", searchInput.id + "autocomplete-list");
+                    autocompleteList.setAttribute("class", "autocomplete-items");
+                    searchInput.parentNode.appendChild(autocompleteList);
+                }
+                
+                autocompleteList.innerHTML = '';
+                for (let i = 0; i < suggestions.length; i++) {
+                    const suggestionElement = document.createElement("DIV");
+                    suggestionElement.innerHTML = suggestions[i];
+                    suggestionElement.addEventListener("click", function(e) {
+                        searchInput.value = this.innerText;
+                        closeAllLists();
+                    });
+                    autocompleteList.appendChild(suggestionElement);
+                }
+            } catch (error) {
+                console.error('Error fetching autocomplete suggestions:', error);
+            }
+        }
+
+        function closeAllLists(elmnt) {
+            var x = document.getElementsByClassName("autocomplete-items");
+            for (var i = 0; i < x.length; i++) {
+                if (elmnt != x[i] && elmnt != searchInput) {
+                    x[i].parentNode.removeChild(x[i]);
+                }
+            }
+        }
+
+        document.addEventListener("click", function (e) {
+            closeAllLists(e.target);
+        });
+
+
+        async function performSearch() {
+            const query = searchInput.value.trim();
+            const type = searchType.value;
+
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            resultsContainer.innerHTML = 'Searching...';
+
+            try {
+                let url;
+                if (type === 'actor') {
+                    url = `${API_BASE_URL}/actors/${encodeURIComponent(query)}/filmography`;
+                } else {
+                    url = `${API_BASE_URL}/search/movies?query=${encodeURIComponent(query)}`;
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (type === 'actor' && data === null) {
+                        resultsContainer.innerHTML = `
+                            <p>No results found for actor: ${query}</p>
+                            <button id="addActorBtn">Add this actor from TMDB</button>
+                        `;
+                        document.getElementById('addActorBtn').onclick = () => addActorFromTMDB(query);
+                    } else {
+                        displayResults(data, type);
+                    }
+                } else {
+                    resultsContainer.innerHTML = `Error: ${data.detail || 'Something went wrong'}`;
+                }
+            } catch (error) {
+                resultsContainer.innerHTML = `Error: ${error.message}`;
+            }
+        }
+
+        function displayResults(data, type) {
+            resultsContainer.innerHTML = '';
+
+            if (type === 'actor') {
+                const actorInfo = document.createElement('div');
+                actorInfo.className = 'result-item';
+                actorInfo.innerHTML = `
+                    <h3>${data.actor.name}</h3>
+                    <p>Date of Birth: ${data.actor.date_of_birth || 'Unknown'}</p>
+                    <p>Gender: ${data.actor.gender || 'Unknown'}</p>
+                `;
+                resultsContainer.appendChild(actorInfo);
+
+                const moviesList = document.createElement('div');
+                moviesList.innerHTML = '<h3>Filmography:</h3>';
+                data.movies.forEach(movie => {
+                    const movieItem = document.createElement('div');
+                    movieItem.className = 'result-item';
+                    movieItem.innerHTML = `
+                        <p><strong>${movie.title}</strong> (${movie.year})</p>
+                    `;
+                    moviesList.appendChild(movieItem);
+                });
+                resultsContainer.appendChild(moviesList);
+            } else {
+                if (data.length === 0) {
+                    resultsContainer.innerHTML = 'No movies found.';
+                    return;
+                }
+
+                data.forEach(movie => {
+                    const movieItem = document.createElement('div');
+                    movieItem.className = 'result-item';
+                    movieItem.innerHTML = `
+                        <h3>${movie.title}</h3>
+                        <p>Year: ${movie.year}</p>
+                    `;
+                    resultsContainer.appendChild(movieItem);
+                });
+            }
+        }
+
+        async function addActorFromTMDB(actorName) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/add_actor_from_tmdb/${encodeURIComponent(actorName)}`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    resultsContainer.innerHTML = `
+                        <p>${result.message}</p>
+                        <div class="result-item">
+                            <h3>${result.data.name}</h3>
+                            <p>Date of Birth: ${result.data.date_of_birth || 'Unknown'}</p>
+                            <p>Gender: ${result.data.gender || 'Unknown'}</p>
+                            <p>Number of movies: ${result.data.movies_count}</p>
+                        </div>
+                        <button onclick="performSearch()">Refresh Search</button>
+                    `;
+                } else {
+                    resultsContainer.innerHTML = `Error: ${result.detail || 'Something went wrong'}`;
+                }
+            } catch (error) {
+                console.error('Add actor error:', error);
+                resultsContainer.innerHTML = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
