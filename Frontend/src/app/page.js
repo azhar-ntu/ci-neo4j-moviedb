@@ -55,15 +55,20 @@ const CypherQueryDisplay = ({ query }) => {
   );
 };
 
-const capitalizeFirstLetter = (string) => {
-  if (!string) return "";
-  return string.charAt(0).toUpperCase() + string.slice(1);
+const capitalizeWords = (str) => {
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 };
 
 const addActorFromTMDB = async (actorName) => {
   try {
+    const formattedName = capitalizeWords(actorName.trim());
+    
     const response = await apiService.postData(
-      `/add_actor_from_tmdb/${encodeURIComponent(actorName)}`
+      `/add_actor_from_tmdb/${encodeURIComponent(formattedName)}`
     );
 
     if (!response.ok) {
@@ -84,7 +89,7 @@ const NotFoundMessage = ({ type, query, onAddActor }) => (
       <span className="text-6xl">🔍</span>
     </div>
     <h2 className="text-2xl font-bold mb-2">
-      No {capitalizeFirstLetter(type)} Found
+      No {capitalizeWords(type)} Found
     </h2>
     <p className="text-gray-600 mb-6">
       We couldn't find any {type === "actor" ? "actor" : "movie"} matching "
@@ -135,7 +140,8 @@ export default function Home() {
   // Update URL when search is performed
   const updateURL = (query, type) => {
     const params = new URLSearchParams();
-    params.set("q", query);
+    const formattedQuery = type === "actor" ? capitalizeWords(query) : query;
+    params.set("q", formattedQuery);
     params.set("type", type);
     router.push(`/?${params.toString()}`, { scroll: false });
   };
@@ -244,8 +250,10 @@ export default function Home() {
   const handleSearch = async (query = searchQuery, type = searchType) => {
     if (!query.trim()) return;
 
+    const formattedQuery = type === "actor" ? capitalizeWords(query) : query;
+    
     const params = new URLSearchParams();
-    params.set("q", query);
+    params.set("q", formattedQuery);
     params.set("type", type);
     window.history.pushState({}, "", `/?${params.toString()}`);
 
@@ -253,18 +261,18 @@ export default function Home() {
     setError(null);
     setNotFound(false);
     setSelectedNode(null);
-    setLastSearchedQuery(query);
-    updateURL(query, type);
+    setLastSearchedQuery(formattedQuery);
+    updateURL(formattedQuery, type);
 
     // Set the current Cypher query based on search type
     const cypherQuery =
       type === "actor"
-        ? `MATCH (a:Actor {name: "${query}"})-[:ACTED_IN]->(m:Movie)
+        ? `MATCH (a:Actor {name: "${formattedQuery}"})-[:ACTED_IN]->(m:Movie)
 WITH a as actor, m
 ORDER BY m.year DESC, m.title
 WITH actor, collect(m) as movies
 RETURN actor, movies`
-        : `MATCH (m:Movie {title: "${query}"})
+        : `MATCH (m:Movie {title: "${formattedQuery}"})
 OPTIONAL MATCH (a:Actor)-[:ACTED_IN]->(m)
 WITH m as movie, a
 ORDER BY a.name
@@ -275,7 +283,7 @@ RETURN movie, actors`;
 
     try {
       const response = await apiService.fetchData(
-        `/${type}s/${encodeURIComponent(query)}/${
+        `/${type}s/${encodeURIComponent(formattedQuery)}/${
           type === "actor" ? "filmography" : "cast"
         }`
       );

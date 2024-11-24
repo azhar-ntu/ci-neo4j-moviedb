@@ -75,3 +75,26 @@
 2024-11-25 02:53:21,392 - INFO - Actor added to Neo4j with filmography: Akon
 2024-11-25 02:53:25,136 - INFO - Actor added to Neo4j with filmography: Akon
 2024-11-25 02:53:44,993 - INFO - Actor updated from TMDB: Alexander Daniel Pimentel
+2024-11-25 03:02:11,358 - INFO - Actor added to Neo4j with filmography: Aya Cash
+2024-11-25 03:02:13,998 - INFO - Actor added to Neo4j with filmography: Aya Cash
+2024-11-25 03:02:43,646 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:03:13,377 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:03:47,869 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:03:48,949 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:03:49,415 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:03:49,823 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:03:50,230 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:03:50,531 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:03:50,731 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:03:50,908 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:03:51,099 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:03:51,266 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:03:51,440 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:04:19,665 - INFO - Actor added to Neo4j with filmography: Anthony Starr
+2024-11-25 03:04:33,639 - INFO - Actor added to Neo4j with filmography: Jessie T. Usher
+2024-11-25 03:04:35,532 - INFO - Actor added to Neo4j with filmography: Jessie T. Usher
+2024-11-25 03:11:08,635 - INFO - Actor added to Neo4j with filmography: Maya Rudolph
+2024-11-25 03:14:29,047 - ERROR - Error adding actor from TMDB: 404: Actor Danial Radcliffe not found in TMDB
+2024-11-25 03:14:32,639 - ERROR - Error adding actor from TMDB: 404: Actor Danial Radcliffe not found in TMDB
+2024-11-25 03:14:51,530 - INFO - Actor added to Neo4j with filmography: Emma Watson
+2024-11-25 03:15:06,921 - INFO - Actor added to Neo4j with filmography: Daniel Radcliffe
