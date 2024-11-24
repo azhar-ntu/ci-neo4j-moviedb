@@ -61,3 +61,17 @@
 2024-11-21 20:19:56,219 - INFO - Actor added to Neo4j with filmography: Will Smith
 2024-11-21 20:53:45,906 - INFO - Actor added to Neo4j with filmography: John Travolta
 2024-11-21 20:58:13,652 - INFO - Actor added to Neo4j with filmography: Tobey Maguire
+2024-11-25 02:30:24,461 - INFO - Actor added to Neo4j with filmography: Tessa Thompson
+2024-11-25 02:30:25,860 - INFO - Actor added to Neo4j with filmography: Tessa Thompson
+2024-11-25 02:30:26,957 - INFO - Actor added to Neo4j with filmography: Tessa Thompson
+2024-11-25 02:30:30,904 - INFO - Actor added to Neo4j with filmography: Scarlett Johansson
+2024-11-25 02:30:53,828 - INFO - Actor added to Neo4j with filmography: Scarlett Johansson
+2024-11-25 02:39:18,935 - INFO - Actor updated from TMDB: Dave Bautista
+2024-11-25 02:39:56,904 - INFO - Actor updated from TMDB: Natalie Portman
+2024-11-25 02:44:02,794 - INFO - Actor updated from TMDB: Elizabeth Olsen
+2024-11-25 02:47:26,862 - INFO - Actor updated from TMDB: Zendaya
+2024-11-25 02:49:29,865 - INFO - Actor added to Neo4j with filmography: Chloe Bennet
+2024-11-25 02:49:38,869 - INFO - Actor added to Neo4j with filmography: Chloe Bennet
+2024-11-25 02:53:21,392 - INFO - Actor added to Neo4j with filmography: Akon
+2024-11-25 02:53:25,136 - INFO - Actor added to Neo4j with filmography: Akon
+2024-11-25 02:53:44,993 - INFO - Actor updated from TMDB: Alexander Daniel Pimentel

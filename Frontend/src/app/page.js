@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { SearchBar } from "@/components/ui/searchbar";
 import { DetailsCard } from "@/components/ui/details";
 import { apiService } from "@/lib/api-config";
+import Link from 'next/link';
 
 // Dynamically import ForceGraph2D to avoid SSR issues
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
@@ -356,21 +357,55 @@ RETURN movie, actors`;
     }
   };
 
+  const handleNavigation = (path) => {
+    // Reset all states
+    setSearchQuery("");
+    setSelectedNode(null);
+    setSearchResults(null);
+    setGraphData({ nodes: [], links: [] });
+    setCurrentQuery("");
+    setNotFound(false);
+    setLastSearchedQuery("");
+    
+    // Navigate to the new path
+    router.push(path);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <Card className="max-w-6xl mx-auto">
         <CardHeader>
-          <CardTitle>Movie Database Explorer</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>🎬 Movie Database Explorer 🍿</CardTitle>
+            <div className="flex gap-4">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                onClick={() => handleNavigation('/actors')}
+              >
+                <User size={16} />
+                View All Actors
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                onClick={() => handleNavigation('/movies')}
+              >
+                <Film size={16} />
+                View All Movies
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <Suspense>
             <SearchBar
               searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            searchType={searchType}
-            onSearch={(suggestion) => handleSearch(suggestion || searchQuery)}
-            onTypeChange={handleTypeChange}
-          />
+              setSearchQuery={setSearchQuery}
+              searchType={searchType}
+              onSearch={(suggestion) => handleSearch(suggestion || searchQuery)}
+              onTypeChange={handleTypeChange}
+            />
           </Suspense>
 
           {error && (
