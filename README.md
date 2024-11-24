@@ -5,9 +5,11 @@ This API provides endpoints to manage a movie database, including actors and mov
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
-- Python 3.7+
+- Python 3.8+
+- Nodejs 18
 - Neo4j Database
 - TMDB API Key
+- Docker Desktop
 
 ## Setup
 
@@ -23,8 +25,22 @@ Before you begin, ensure you have the following installed:
    ```
    pip install fastapi uvicorn py2neo requests
    ```
+   
+4. Step up neo4j database in your local: 
+   1. pull the lastest neo4j
+   ```
+   docker pull neo4j:latest
+   ```
+5. Run below command in your terminal
+   ```
+   docker run \
+   --name neo4j-container \
+   -p 7474:7474 -p 7687:7687 \
+   -e NEO4J_AUTH=neo4j/testpassword \
+   -d neo4j:latest
+   ```
 
-4. Open the `main.py` file and update the following variables with your actual values:
+6. Open the `main.py` file and update the following variables with your actual values:
    - `NEO4J_URI`
    - `NEO4J_USER`
    - `NEO4J_PASSWORD`
@@ -32,16 +48,47 @@ Before you begin, ensure you have the following installed:
 
 ## Running the API
 
-1. Start the FastAPI server:
-   ```
-   uvicorn main:app --reload
+1. Go to ./Backend folder
+   ``` 
+    cd .\Backend\
    ```
 
-2. The API will be available at `http://localhost:8000`.
+2. Start the FastAPI server:
+   ```
+   uvicorn main:app --host 0.0.0.0 --port 10000
+   ```
 
-3. You can access the automatic API documentation at:
-   - Swagger UI: `http://localhost:8000/docs`
-   - ReDoc: `http://localhost:8000/redoc`
+3. The API will be available at `http://localhost:10000`.
+
+4. You can access the automatic API documentation at:
+   - Swagger UI: `http://localhost:10000/docs`
+   - ReDoc: `http://localhost:10000/redoc`
+
+## Running the Web Application
+
+1. Go to ./Frontend folder
+   ``` 
+    cd .\Frontend\
+   ```
+
+2. Install necessary dependency, run npm command:
+   ```
+   npm install
+   ```
+   if the node version is higher than v19.0, need to run below command
+   ```
+    npm install --legacy-peer-deps
+   ```
+   
+3. Run build 
+   ```
+   npm build
+   ```
+
+4. Run the application
+   ```
+   npm start
+   ```
 
 ## API Endpoints
 
