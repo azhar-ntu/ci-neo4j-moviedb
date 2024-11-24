@@ -98,3 +98,6 @@
 2024-11-25 03:14:32,639 - ERROR - Error adding actor from TMDB: 404: Actor Danial Radcliffe not found in TMDB
 2024-11-25 03:14:51,530 - INFO - Actor added to Neo4j with filmography: Emma Watson
 2024-11-25 03:15:06,921 - INFO - Actor added to Neo4j with filmography: Daniel Radcliffe
+2024-11-25 03:40:12,716 - INFO - Actor added to Neo4j with filmography: Andre Braugher
+2024-11-25 03:42:55,049 - INFO - Actor added to Neo4j with filmography: Arnold Schwarzenegger
+2024-11-25 03:52:26,712 - INFO - Actor added to Neo4j with filmography: Gabriel Macht

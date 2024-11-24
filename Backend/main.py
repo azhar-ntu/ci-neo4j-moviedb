@@ -1,7 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from py2neo import Graph, Node, Relationship, NodeMatcher
@@ -11,6 +10,7 @@ import requests
 import re
 from datetime import datetime
 import asyncio
+from pathlib import Path
 
 app = FastAPI()
 
@@ -45,12 +45,22 @@ logging.basicConfig(filename='api_log.txt', level=logging.INFO,
 # Load HTML content
 # Update the HTML content loading to use a function
 def get_html_content():
-    with open("index.html", "r") as file:
-        return file.read()
+    html_path = Path(__file__).parent / "index.html"
+    try:
+        with open(html_path, "r", encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        logging.error(f"index.html not found at {html_path}")
+        return "Error: index.html not found"
+    except Exception as e:
+        logging.error(f"Error reading index.html: {str(e)}")
+        return f"Error reading index.html: {str(e)}"
 
-@app.get("/", response_class=HTMLResponse)
-async def read_root():
-    return get_html_content()
+logging.basicConfig(
+    filename=Path(__file__).parent.parent / 'api_log.txt',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
     
 @app.get("/autocomplete/{search_type}")
 async def autocomplete(search_type: str, query: str = Query(..., min_length=1)):
@@ -112,9 +122,6 @@ async def search(search_type: str, query: str = Query(..., min_length=1)):
         logging.error(f"Error in search: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
     
-@app.get("/", response_class=HTMLResponse)
-async def read_root():
-    return get_html_content()
 class Actor(BaseModel):
     name: str
     date_of_birth: Optional[str] = None
@@ -693,6 +700,11 @@ async def seed_actors():
     except Exception as e:
         logging.error(f"Error seeding actors: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# Update root endpoint
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return get_html_content()
 
 if __name__ == "__main__":
     import uvicorn
