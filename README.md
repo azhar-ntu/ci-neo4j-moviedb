@@ -17,7 +17,7 @@ There are several ways to run this application, first clone the repository:
 
 ```bash
 # Clone the repository
-git clone https://github.com/azharntu/ci-neo4j-moviedb.git
+git clone https://github.com/azhar-ntu/ci-neo4j-moviedb.git
 cd ci-neo4j-moviedb
 ```
 Docker will be required to be installed to run the application for methods 1 - 3. 
