@@ -9,9 +9,7 @@ A web application for exploring movie and actor relationships using Neo4j graph 
 - Interactive graph visualization of actor-movie relationships
 - Actor and movie search with auto-completion
 - Detailed actor filmographies and movie cast lists
-- Integration with TMDB API for actor and movie data
-- Support for both local and cloud-based Neo4j instances
-- Docker support for easy deployment
+- Integration with The Movie Database (TMDB) API for actor and movie data
 
 ## Installation
 
@@ -107,10 +105,9 @@ npm run start
 - `NEXT_PUBLIC_API_URL`: Backend API URL (default: http://localhost:10000)
 ---
 ## API Documentation
-FastAPI automatically generates API documentation at `/docs` and `/redoc` endpoints.
-https://ci-neo4j-moviedb-backend.onrender.com/docs
-https://ci-neo4j-moviedb-backend.onrender.com/redoc
-
+FastAPI automatically generates API documentation at `/docs` and `/redoc` endpoints of the backend service ([localhost:10000](http://localhost:10000)).
+- [API Documentation](https://ci-neo4j-moviedb-backend.onrender.com/docs)
+- [API Documentation ReDoc](https://ci-neo4j-moviedb-backend.onrender.com/redoc)
 
 ### Actor Endpoints
 
