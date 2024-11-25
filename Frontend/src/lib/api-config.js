@@ -25,6 +25,21 @@ const getApiBaseUrl = () => {
       const baseUrl = getApiBaseUrl();
       const response = await fetch(`${baseUrl}${endpoint}`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      return response;
+    },
+  
+    async putData(endpoint, data = {}) {
+      const baseUrl = getApiBaseUrl();
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(data),
       });
       return response;

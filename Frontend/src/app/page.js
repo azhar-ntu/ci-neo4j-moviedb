@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, Suspense } from "react";
-import { Search, User, Film } from "lucide-react";
+import { User, Film } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { SearchBar } from "@/components/ui/searchbar";
 import { DetailsCard } from "@/components/ui/details";
 import { apiService } from "@/lib/api-config";
+import { WelcomeMessage } from "@/components/ui/welcome";
 
 // Dynamically import ForceGraph2D to avoid SSR issues
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
@@ -54,15 +55,29 @@ const CypherQueryDisplay = ({ query }) => {
   );
 };
 
-const capitalizeFirstLetter = (string) => {
-  if (!string) return "";
-  return string.charAt(0).toUpperCase() + string.slice(1);
+const capitalizeWords = (str) => {
+  // Check if string is mixed case (has both upper and lower case letters)
+  const hasMixedCase = str !== str.toUpperCase() && str !== str.toLowerCase();
+  
+  // If mixed case, return original string unchanged
+  if (hasMixedCase) {
+    return str;
+  }
+  
+  // Otherwise, apply the capitalization transformation
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 };
 
 const addActorFromTMDB = async (actorName) => {
   try {
+    const formattedName = capitalizeWords(actorName.trim());
+
     const response = await apiService.postData(
-      `/add_actor_from_tmdb/${encodeURIComponent(actorName)}`
+      `/add_actor_from_tmdb/${encodeURIComponent(formattedName)}`
     );
 
     if (!response.ok) {
@@ -83,7 +98,7 @@ const NotFoundMessage = ({ type, query, onAddActor }) => (
       <span className="text-6xl">🔍</span>
     </div>
     <h2 className="text-2xl font-bold mb-2">
-      No {capitalizeFirstLetter(type)} Found
+      No {capitalizeWords(type)} Found
     </h2>
     <p className="text-gray-600 mb-6">
       We couldn't find any {type === "actor" ? "actor" : "movie"} matching "
@@ -117,6 +132,10 @@ export default function Home() {
   const [showCypherQuery, setShowCypherQuery] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [lastSearchedQuery, setLastSearchedQuery] = useState("");
+  const [hasActors, setHasActors] = useState(true);
+  const [isSeeding, setIsSeeding] = useState(false);
+  const [toast, setToast] = useState(null);
+
 
   // Initialize state from URL on component mount
   useEffect(() => {
@@ -134,7 +153,8 @@ export default function Home() {
   // Update URL when search is performed
   const updateURL = (query, type) => {
     const params = new URLSearchParams();
-    params.set("q", query);
+    const formattedQuery = type === "actor" ? capitalizeWords(query) : query;
+    params.set("q", formattedQuery);
     params.set("type", type);
     router.push(`/?${params.toString()}`, { scroll: false });
   };
@@ -150,7 +170,7 @@ export default function Home() {
         name: data.actor.name,
         type: "actor",
         val: 45,
-        collisionRadius: 80
+        collisionRadius: 80,
       });
 
       // Add movie nodes and connections (limit to first 29 movies)
@@ -161,13 +181,13 @@ export default function Home() {
           type: "movie",
           val: 40,
           year: movie.year,
-          collisionRadius: 75
+          collisionRadius: 75,
         });
 
         links.push({
           source: data.actor.name,
           target: movie.title,
-          distance: 500
+          distance: 500,
         });
       });
     } else if (type === "movie" && data?.movie && data?.actors) {
@@ -178,7 +198,7 @@ export default function Home() {
         type: "movie",
         val: 45,
         year: data.movie.year,
-        collisionRadius: 80
+        collisionRadius: 80,
       });
 
       // Add actor nodes and connections (limit to first 29 actors)
@@ -188,13 +208,13 @@ export default function Home() {
           name: actor.name,
           type: "actor",
           val: 40,
-          collisionRadius: 75
+          collisionRadius: 75,
         });
 
         links.push({
           source: data.movie.title,
           target: actor.name,
-          distance: 500
+          distance: 500,
         });
       });
     }
@@ -213,7 +233,7 @@ export default function Home() {
 
     router.push("/", { scroll: false });
   };
-  // Add effect to handle browser navigation
+
   useEffect(() => {
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
@@ -239,12 +259,70 @@ export default function Home() {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
+
+  useEffect(() => {
+    const checkForActors = async () => {
+      try {
+        const response = await apiService.fetchData("/actors");
+        const data = await response.json();
+        setHasActors(data && data.length > 0);
+      } catch (error) {
+        console.error("Error checking for actors:", error);
+        setHasActors(false);
+      }
+    };
+
+    checkForActors();
+  }, []);
+
+  const handleSeedActors = async () => {
+    setIsSeeding(true);
+    const startTime = Date.now();
+
+    setToast({
+      title: 'Seeding Database',
+      description: 'Adding actors and their filmographies...',
+      loading: true
+    });
   
+    try {
+      const response = await apiService.postData('/seed/actors');
+      if (response.ok) {
+        const data = await response.json();
+        const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+        
+        // Show success toast
+        setToast({
+          title: 'Database Seeded!',
+          description: `Added ${data.total_successful} actors in ${duration}s`,
+          loading: false
+        });
+        
+        // Clear toast after 5 seconds
+        setTimeout(() => setToast(null), 5000);
+        setHasActors(true);
+      }
+    } catch (error) {
+      console.error('Error seeding actors:', error);
+      setToast({
+        title: 'Seeding Failed',
+        description: 'Please try again',
+        loading: false
+      });
+      setTimeout(() => setToast(null), 3000);
+      setError('Failed to seed actors. Please try again.');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   const handleSearch = async (query = searchQuery, type = searchType) => {
     if (!query.trim()) return;
 
+    const formattedQuery = type === "actor" ? capitalizeWords(query) : query;
+
     const params = new URLSearchParams();
-    params.set("q", query);
+    params.set("q", formattedQuery);
     params.set("type", type);
     window.history.pushState({}, "", `/?${params.toString()}`);
 
@@ -252,18 +330,18 @@ export default function Home() {
     setError(null);
     setNotFound(false);
     setSelectedNode(null);
-    setLastSearchedQuery(query);
-    updateURL(query, type);
+    setLastSearchedQuery(formattedQuery);
+    updateURL(formattedQuery, type);
 
     // Set the current Cypher query based on search type
     const cypherQuery =
       type === "actor"
-        ? `MATCH (a:Actor {name: "${query}"})-[:ACTED_IN]->(m:Movie)
+        ? `MATCH (a:Actor {name: "${formattedQuery}"})-[:ACTED_IN]->(m:Movie)
 WITH a as actor, m
 ORDER BY m.year DESC, m.title
 WITH actor, collect(m) as movies
 RETURN actor, movies`
-        : `MATCH (m:Movie {title: "${query}"})
+        : `MATCH (m:Movie {title: "${formattedQuery}"})
 OPTIONAL MATCH (a:Actor)-[:ACTED_IN]->(m)
 WITH m as movie, a
 ORDER BY a.name
@@ -274,7 +352,7 @@ RETURN movie, actors`;
 
     try {
       const response = await apiService.fetchData(
-        `/${type}s/${encodeURIComponent(query)}/${
+        `/${type}s/${encodeURIComponent(formattedQuery)}/${
           type === "actor" ? "filmography" : "cast"
         }`
       );
@@ -356,23 +434,68 @@ RETURN movie, actors`;
     }
   };
 
+  const handleNavigation = (path) => {
+    // Reset all states
+    setSearchQuery("");
+    setSelectedNode(null);
+    setSearchResults(null);
+    setGraphData({ nodes: [], links: [] });
+    setCurrentQuery("");
+    setNotFound(false);
+    setLastSearchedQuery("");
+
+    // Navigate to the new path
+    router.push(path);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <Card className="max-w-6xl mx-auto">
         <CardHeader>
-          <CardTitle>Movie Database Explorer</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>🎬 Movie Database Explorer 🍿</CardTitle>
+            <div className="flex gap-4">
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => handleNavigation("/actors")}
+              >
+                <User size={16} />
+                View All Actors
+              </Button>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => handleNavigation("/movies")}
+              >
+                <Film size={16} />
+                View All Movies
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <Suspense>
             <SearchBar
               searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            searchType={searchType}
-            onSearch={(suggestion) => handleSearch(suggestion || searchQuery)}
-            onTypeChange={handleTypeChange}
-          />
+              setSearchQuery={setSearchQuery}
+              searchType={searchType}
+              onSearch={(suggestion) => handleSearch(suggestion || searchQuery)}
+              onTypeChange={handleTypeChange}
+            />
           </Suspense>
+          {!hasActors && (
+            <WelcomeMessage
+              onSeedActors={handleSeedActors}
+              isLoading={isSeeding}
+            />
+          )}
 
+          {error && (
+            <div className="text-red-500 mb-4 p-4 bg-red-50 rounded-lg mt-4">
+              {error}
+            </div>
+          )}
           {error && (
             <div className="text-red-500 mb-4 p-4 bg-red-50 rounded-lg">
               {error}
@@ -533,8 +656,9 @@ RETURN movie, actors`;
                 </div>
               </div>
               <p className="text-sm text-gray-500 mt-2 text-center italic">
-                  * Graph visualization shows only the first 25 connections for better readability. See complete list below.
-                </p>
+                * Graph visualization shows only the first 25 connections for
+                better readability. See complete list below.
+              </p>
               {/* Results List */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between px-2">

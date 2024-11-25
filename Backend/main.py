@@ -1,7 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from py2neo import Graph, Node, Relationship, NodeMatcher
@@ -11,6 +10,7 @@ import requests
 import re
 from datetime import datetime
 import asyncio
+from pathlib import Path
 
 app = FastAPI()
 
@@ -45,12 +45,22 @@ logging.basicConfig(filename='api_log.txt', level=logging.INFO,
 # Load HTML content
 # Update the HTML content loading to use a function
 def get_html_content():
-    with open("index.html", "r") as file:
-        return file.read()
+    html_path = Path(__file__).parent / "index.html"
+    try:
+        with open(html_path, "r", encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        logging.error(f"index.html not found at {html_path}")
+        return "Error: index.html not found"
+    except Exception as e:
+        logging.error(f"Error reading index.html: {str(e)}")
+        return f"Error reading index.html: {str(e)}"
 
-@app.get("/", response_class=HTMLResponse)
-async def read_root():
-    return get_html_content()
+logging.basicConfig(
+    filename=Path(__file__).parent.parent / 'api_log.txt',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
     
 @app.get("/autocomplete/{search_type}")
 async def autocomplete(search_type: str, query: str = Query(..., min_length=1)):
@@ -112,9 +122,6 @@ async def search(search_type: str, query: str = Query(..., min_length=1)):
         logging.error(f"Error in search: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
     
-@app.get("/", response_class=HTMLResponse)
-async def read_root():
-    return get_html_content()
 class Actor(BaseModel):
     name: str
     date_of_birth: Optional[str] = None
@@ -161,16 +168,6 @@ async def read_actor(name: str):
 async def read_actors():
     actors = matcher.match("Actor")
     return [Actor(**dict(actor)) for actor in actors]
-
-@app.put("/actors/{name}", response_model=Actor)
-async def update_actor(name: str, actor: Actor):
-    actor_node = matcher.match("Actor", name=name).first()
-    if actor_node:
-        actor_node.update(**actor.dict())
-        graph.push(actor_node)
-        logging.info(f"Actor updated: {name}")
-        return Actor(**dict(actor_node))
-    raise HTTPException(status_code=404, detail="Actor not found")
 
 @app.delete("/actors/{name}")
 async def delete_actor(name: str):
@@ -361,58 +358,73 @@ async def get_actor_filmography(name: str):
             } for movie in movies_data
         ]
     }
-@app.post("/actors/add")
-async def add_actor(actor: ActorCreate):
+@app.put("/actors/{name}", response_model=Actor)
+async def update_actor(name: str, actor: Optional[Actor] = None):
     try:
-        actor_node = Node("Actor", **actor.dict())
-        graph.create(actor_node)
-        logging.info(f"Actor added: {actor.name}")
-        return {"message": f"Actor {actor.name} added successfully"}
+        actor_node = matcher.match("Actor", name=name).first()
+        if not actor_node:
+            raise HTTPException(status_code=404, detail="Actor not found")
+
+        if actor:
+            # Update with provided data
+            actor_node.update(**actor.dict(exclude_unset=True))
+            graph.push(actor_node)
+        else:
+            # Update from TMDB
+            # Search for actor in TMDB
+            search_url = f"{TMDB_BASE_URL}/search/person"
+            params = {
+                "api_key": TMDB_API_KEY,
+                "query": name
+            }
+            response = requests.get(search_url, params=params)
+            data = response.json()
+
+            if not data["results"]:
+                return {"message": "No updates available from TMDB"}
+
+            actor_data = data["results"][0]
+            actor_id = actor_data["id"]
+            
+            # Fetch detailed actor info
+            details_url = f"{TMDB_BASE_URL}/person/{actor_id}"
+            params = {
+                "api_key": TMDB_API_KEY,
+                "append_to_response": "movie_credits"
+            }
+            details_response = requests.get(details_url, params=params)
+            actor_details = details_response.json()
+            
+            # Update actor in Neo4j
+            cypher_query = """
+            MATCH (a:Actor {name: $name})
+            SET a.profile_path = $profile_path,
+                a.gender = CASE WHEN $gender = 2 THEN 'Male' WHEN $gender = 1 THEN 'Female' ELSE a.gender END,
+                a.date_of_birth = COALESCE($birthday, a.date_of_birth),
+                a.date_of_death = COALESCE($deathday, a.date_of_death)
+            RETURN a
+            """
+            
+            result = graph.run(cypher_query, {
+                'name': name,
+                'profile_path': actor_data.get('profile_path'),
+                'gender': actor_details.get('gender'),
+                'birthday': actor_details.get('birthday'),
+                'deathday': actor_details.get('deathday')
+            }).data()
+
+            if result:
+                logging.info(f"Actor updated from TMDB: {name}")
+                return {
+                    "message": "Actor updated successfully",
+                    "data": result[0]['a']
+                }
+                
+            return {"message": "No updates available"}
+            
     except Exception as e:
-        logging.error(f"Error adding actor: {str(e)}")
+        logging.error(f"Error updating actor: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/actors/{name}/filmography", response_model=Optional[ActorFilmography])
-async def get_actor_filmography(name: str):
-    cypher_query = """
-    MATCH (a:Actor {name: $name})-[:ACTED_IN]->(m:Movie)
-    RETURN a AS actor, collect(m) AS movies
-    """
-    result = graph.run(cypher_query, name=name).data()
-    
-    if not result:
-        return None
-    
-    actor_data = result[0]['actor']
-    movies_data = result[0]['movies']
-    
-    return ActorFilmography(
-        actor=Actor(**dict(actor_data)),
-        movies=[Movie(**dict(movie)) for movie in movies_data]
-    )
-
-# Search endpoints
-@app.get("/search/actors", response_model=List[Actor])
-async def search_actors(query: str = Query(..., min_length=1)):
-    cypher_query = """
-    MATCH (a:Actor)
-    WHERE a.name =~ $regex
-    RETURN a
-    """
-    regex = f"(?i).*{re.escape(query)}.*"
-    results = graph.run(cypher_query, regex=regex).data()
-    return [Actor(**dict(result['a'])) for result in results]
-
-@app.get("/search/movies", response_model=List[Movie])
-async def search_movies(query: str = Query(..., min_length=1)):
-    cypher_query = """
-    MATCH (m:Movie)
-    WHERE m.title =~ $regex
-    RETURN m
-    """
-    regex = f"(?i).*{re.escape(query)}.*"
-    results = graph.run(cypher_query, regex=regex).data()
-    return [Movie(**dict(result['m'])) for result in results]
 
 @app.get("/movies/{title}/cast")
 async def get_movie_cast(title: str):
@@ -486,57 +498,6 @@ async def get_movie_poster(title: str):
         logging.error(f"Error fetching movie poster: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/actor/update/{name}")
-async def update_actor_data(name: str):
-    try:
-        # Search for actor in TMDB
-        search_url = f"{TMDB_BASE_URL}/search/person"
-        params = {
-            "api_key": TMDB_API_KEY,
-            "query": name
-        }
-        response = requests.get(search_url, params=params)
-        data = response.json()
-
-        if data["results"]:
-            actor_data = data["results"][0]
-            actor_id = actor_data["id"]
-            
-            # Fetch detailed actor info
-            details_url = f"{TMDB_BASE_URL}/person/{actor_id}"
-            params = {
-                "api_key": TMDB_API_KEY,
-                "append_to_response": "movie_credits"
-            }
-            details_response = requests.get(details_url, params=params)
-            actor_details = details_response.json()
-            
-            # Update actor in Neo4j
-            cypher_query = """
-            MATCH (a:Actor {name: $name})
-            SET a.profile_path = $profile_path,
-                a.gender = CASE WHEN $gender = 2 THEN 'Male' WHEN $gender = 1 THEN 'Female' ELSE a.gender END,
-                a.date_of_birth = COALESCE($birthday, a.date_of_birth),
-                a.date_of_death = COALESCE($deathday, a.date_of_death)
-            RETURN a
-            """
-            
-            result = graph.run(cypher_query, {
-                'name': name,
-                'profile_path': actor_data.get('profile_path'),
-                'gender': actor_details.get('gender'),
-                'birthday': actor_details.get('birthday'),
-                'deathday': actor_details.get('deathday')
-            }).data()
-
-            if result:
-                return result[0]['a']
-            
-        return {"message": "No updates available"}
-            
-    except Exception as e:
-        logging.error(f"Error updating actor data: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
 @app.get("/health")
 async def health_check():
     try:
@@ -739,6 +700,11 @@ async def seed_actors():
     except Exception as e:
         logging.error(f"Error seeding actors: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# Update root endpoint
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return get_html_content()
 
 if __name__ == "__main__":
     import uvicorn

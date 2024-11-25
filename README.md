@@ -1,197 +1,268 @@
-# Movie Database API
+# 🎬 Movie Database Explorer 🍿 
+##### *Powered by Neo4j*
 
-This API provides endpoints to manage a movie database, including actors and movies, using Neo4j as the backend database and integrating with The Movie Database (TMDB) for fetching actor information.
+## Description
+A web application for exploring movie and actor relationships using Neo4j graph database. The application allows users to search for actors and movies, visualize their connections, and manage the database through a REST API.
 
-## Prerequisites
+## Features
 
-Before you begin, ensure you have the following installed:
+- Interactive graph visualization of actor-movie relationships
+- Actor and movie search with auto-completion
+- Detailed actor filmographies and movie cast lists
+- Integration with The Movie Database (TMDB) API for actor and movie data
+
+## Installation
+
+There are several ways to run this application, first clone the repository:
+
+```bash
+# Clone the repository
+git clone https://github.com/azharntu/ci-neo4j-moviedb.git
+cd ci-neo4j-moviedb
+```
+
+### 1. Using Pre-built Docker Images
+
+The simplest way to run the application is using the pre-built Docker images:
+- [Frontend](https://hub.docker.com/r/azharntu/in6299-ci-neo4j-moviedb-frontend)
+- [Backend](https://hub.docker.com/r/azharntu/in6299-ci-neo4j-moviedb-backend)
+- [Neo4j](https://hub.docker.com/_/neo4j)
+
+```bash
+# Pull the images
+docker pull azharntu/in6299-ci-neo4j-moviedb-frontend:latest
+docker pull azharntu/in6299-ci-neo4j-moviedb-backend:latest
+docker pull neo4j:5.20.0
+
+# Run using docker-compose
+docker-compose up
+```
+
+### 2. Building Docker Images Locally
+
+If you want to build the frontend & backend images yourself (e.g after code modification):
+
+```bash
+# Build and run using docker-compose
+docker-compose -f docker-compose.dev.yaml up --build
+```
+
+### 3. Using External Neo4j Instance
+
+To use an external Neo4j instance (like Neo4j Desktop or AuraDB):
+
+```yaml
+# Edit docker-compose.external.yaml to set your Neo4j connection details
+environment:
+      - NEO4J_URI=bolt://host.docker.internal:7687  # For Neo4j running on non-docker neo4j instance
+      # - NEO4J_URI=bolt://localhost:7687      # Local Neo4j in same docker network
+      # - NEO4J_URI=bolt://192.168.1.100:7687  # Remote Neo4
+      # - NEO4J_URI=bolt+s://8160b5f6.databases.neo4j.io # For Neo4j running on auradb neo4j instance with ssl
+      - NEO4J_USER=neo4j # Replace with your Neo4j username
+      - NEO4J_PASSWORD=password # Replace with your Neo4j password
+      - TMDB_API_KEY=535b98608031a939cdef34fb2a98ebc5 # Replace with TMDB API key
+      - TMDB_BASE_URL=https://api.themoviedb.org/3
+      - PORT=10000
+```
+
+```bash
+# Then run:
+docker-compose -f docker-compose.external.yaml up
+```
+
+
+###### Target End State
+After docker-compose up, the main frontend application will be available at [localhost:3000](http://localhost:3000)
+The backend application will be available at [localhost:10000](http://localhost:10000)
+
+
+##### Stopping Docker Services
+To stop and teardown the services, run ```docker-compose down```
+
+```bash
+docker-compose down
+# or docker-compose -f docker-compose.dev.yaml down
+# or docker-compose -f docker-compose.external.yaml down
+
+# To clean up neo4j database or start fresh:
+docker volume rm ci-neo4j-moviedb_neo4j_data    
+docker volume rm ci-neo4j-moviedb_neo4j_logs
+```
+
+### 4. Running Services Without Docker
+
+To run the services without Docker, for development purposes or live reloading, ensure you have the following installed / available:
+
 - Python 3.8+
-- Nodejs 18
-- Neo4j Database
-- TMDB API Key
-- Docker Desktop
+- NodeJS 18   
+- Neo4j Database Already Setup and running
+- TMDB API Key (For fetching movie/actor data from TMDB)
 
-## Setup
+#### Backend (Python/FastAPI):
+```bash
+# Install dependencies
+cd Backend
+pip install -r requirements.txt
 
-1. Clone the repository or download the `main.py` file.
+# Set environment variables
+export NEO4J_URI=bolt://localhost:7687
+export NEO4J_USER=neo4j
+export NEO4J_PASSWORD=password
+export TMDB_API_KEY=your_tmdb_api_key
+export PORT=10000
 
-2. Create a virtual environment (optional but recommended):
-   ```
-   python -m venv venv
-   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-   ```
+# Run the server
+uvicorn main:app --host 0.0.0.0 --port 10000
+```
 
-3. Install the required packages:
-   ```
-   pip install fastapi uvicorn py2neo requests
-   ```
-   
-4. Step up neo4j database in your local: 
-   1. pull the lastest neo4j
-   ```
-   docker pull neo4j:latest
-   ```
-5. Run below command in your terminal
-   ```
-   docker run \
-   --name neo4j-container \
-   -p 7474:7474 -p 7687:7687 \
-   -e NEO4J_AUTH=neo4j/testpassword \
-   -d neo4j:latest
-   ```
+#### Frontend (Next.js):
+```bash
+# Install dependencies
+cd Frontend
+npm install --legacy-peer-deps
 
-6. Open the `main.py` file and update the following variables with your actual values:
-   - `NEO4J_URI`
-   - `NEO4J_USER`
-   - `NEO4J_PASSWORD`
-   - `TMDB_API_KEY`
+# Set environment variables
+echo "NEXT_PUBLIC_API_URL=http://localhost:10000" > .env.local
 
-## Running the API
+# Run the development server
+npm run dev
 
-1. Go to ./Backend folder
-   ``` 
-    cd .\Backend\
-   ```
+# OR Compile and run
+npm run build
+npm run start
+```
+###### Target End State
+The main frontend application will be available at [localhost:3000](http://localhost:3000)
+The backend application will be available at [localhost:10000](http://localhost:10000)
+## Environment Variables
 
-2. Start the FastAPI server:
-   ```
-   uvicorn main:app --host 0.0.0.0 --port 10000
-   ```
+### Backend
+- `NEO4J_URI`: Neo4j connection URI (default: bolt://localhost:7687)
+- `NEO4J_USER`: Neo4j username (default: neo4j)
+- `NEO4J_PASSWORD`: Neo4j password
+- `TMDB_API_KEY`: TMDB API key for fetching movie/actor data
+- `TMDB_BASE_URL`: TMDB API base URL (default: https://api.themoviedb.org/3)
+- `PORT`: Backend server port (default: 10000)
 
-3. The API will be available at `http://localhost:10000`.
+### Frontend
+- `NEXT_PUBLIC_API_URL`: Backend API URL (default: http://localhost:10000)
+---
+## API Documentation
+FastAPI automatically generates API documentation at `/docs` and `/redoc` endpoints of the backend service ([localhost:10000](http://localhost:10000)).
+- [API Documentation](https://ci-neo4j-moviedb-backend.onrender.com/docs)
+- [API Documentation ReDoc](https://ci-neo4j-moviedb-backend.onrender.com/redoc)
 
-4. You can access the automatic API documentation at:
-   - Swagger UI: `http://localhost:10000/docs`
-   - ReDoc: `http://localhost:10000/redoc`
+### Actor Endpoints
 
-## Running the Web Application
+#### Search Actors
+```
+GET /search/actor?query={query}
+```
+Search for actors by name.
 
-1. Go to ./Frontend folder
-   ``` 
-    cd .\Frontend\
-   ```
+#### Get Actor Details
+```
+GET /actors/{name}
+```
+Get details for a specific actor.
 
-2. Install necessary dependency, run npm command:
-   ```
-   npm install
-   ```
-   if the node version is higher than v19.0, need to run below command
-   ```
-    npm install --legacy-peer-deps
-   ```
-   
-3. Run build 
-   ```
-   npm build
-   ```
+#### Get Actor Filmography
+```
+GET /actors/{name}/filmography
+```
+Get an actor's complete filmography.
 
-4. Run the application
-   ```
-   npm start
-   ```
+#### Add Actor from TMDB
+```
+POST /add_actor_from_tmdb/{actor_name}
+```
+Add an actor and their filmography from TMDB.
 
-## API Endpoints
+#### Update Actor
+```
+PUT /actors/{name}
+```
+Update actor details, optionally fetching from TMDB.
 
-### Actors
+### Movie Endpoints
 
-- `POST /actors`: Create a new actor
-- `GET /actors/{name}`: Retrieve information about a specific actor
-- `GET /actors`: Retrieve a list of all actors
-- `PUT /actors/{name}`: Update information for a specific actor
-- `DELETE /actors/{name}`: Delete a specific actor
-- `GET /search/actors`: Search for actors by name
-- `GET /actors/{name}/filmography`: Retrieve the filmography of a specific actor
+#### Search Movies
+```
+GET /search/movie?query={query}
+```
+Search for movies by title.
 
-### Movies
+#### Get Movie Cast
+```
+GET /movies/{title}/cast
+```
+Get the complete cast list for a movie.
 
-- `POST /movies`: Create a new movie
-- `GET /movies/{title}`: Retrieve information about a specific movie
-- `GET /movies`: Retrieve a list of all movies
-- `PUT /movies/{title}`: Update information for a specific movie
-- `DELETE /movies/{title}`: Delete a specific movie
-- `GET /search/movies`: Search for movies by title
+#### Get Movie Poster
+```
+GET /movie/poster/{title}
+```
+Get movie poster information from TMDB.
 
-### Relationships
+### Utility Endpoints
 
-- `POST /actor_in_movie`: Create a relationship between an actor and a movie
+#### Autocomplete
+```
+GET /autocomplete/{search_type}?query={query}
+```
+Get autocomplete suggestions for actors or movies.
 
-### TMDB Integration
+#### Health Check
+```
+GET /health
+```
+Check the health status of the application.
 
-- `POST /add_actor_from_tmdb/{actor_name}`: Fetch actor data from TMDB, including their filmography, and add it to the database
+#### Seed Database
+```
+POST /seed/actors
+```
+Seed the database with a predefined list of actors.
 
-## Usage Examples
+---
+## Frontend Functionality (Next.js)
 
-Here are some example curl commands to interact with the API:
+The frontend application at [localhost:3000](http://localhost:3000) provides:
 
-1. Create an actor:
-   ```
-   curl -X 'POST' \
-     'http://localhost:8000/actors' \
-     -H 'accept: application/json' \
-     -H 'Content-Type: application/json' \
-     -d '{"name": "Tom Hanks", "date_of_birth": "1956-07-09", "gender": "Male"}'
-   ```
+1. **Search Interface**
+   - Initial welcome screen with database seeding feature (only when database is empty / no actors in database)
+   ![Welcome Screen](Screenshots/welcome.png)
+   - Dual-mode search for actors or movies, navigation to view all actors or movies pages
+   ![Search Interface](Screenshots/search.png)
+   - Auto-complete suggestions
+   ![Autocomplete suggestions](Screenshots/autocomplete.png)
+   - Support for adding actor data by fetching from The Movie Database (TMDB) API
+   ![Add Actor Button](Screenshots/add-actor.png)
+     - After clicking the button, the actor data will be fetched from TMDB and added to the database
+   ![Added Actor](Screenshots/add-actor-2.png)
 
-2. Get all movies:
-   ```
-   curl -X 'GET' \
-     'http://localhost:8000/movies' \
-     -H 'accept: application/json'
-   ```
+2. **Graph Visualization with Learning Oriented Features**
+   - Cypher query visualization with toggle for query display
+   ![Cypher Query](Screenshots/cypher-query.png)
+   - Interactive force-directed graph showing relationships
+   ![Graph Visualization](Screenshots/graph.png)
+     - Color-coded nodes (red for actors, green for movies)
+  
+3. **Actor & Movie Information**
+   - Actor filmographies with year information
+   ![Actor Filmography](Screenshots/filmography.png)
+   - Movie cast lists (limited to actors in the database)
+   ![Movie Cast](Screenshots/cast.png)
+   - Profile images for actors
+   ![Actor Profile](Screenshots/profile.png)
+   - Movie posters
+   ![Movie Poster](Screenshots/poster.png)
 
-3. Add an actor from TMDB:
-   ```
-   curl -X 'POST' \
-     'http://localhost:8000/add_actor_from_tmdb/Brad%20Pitt' \
-     -H 'accept: application/json'
-   ```
-
-4. Search for actors:
-   ```
-   curl -X 'GET' \
-     'http://localhost:8000/search/actors?query=Tom' \
-     -H 'accept: application/json'
-   ```
-
-5. Search for movies:
-   ```
-   curl -X 'GET' \
-     'http://localhost:8000/search/movies?query=Forrest' \
-     -H 'accept: application/json'
-   ```
-
-6. Get an actor's filmography:
-   ```
-   curl -X 'GET' \
-     'http://localhost:8000/actors/Brad%20Pitt/filmography' \
-     -H 'accept: application/json'
-   ```
-
-## API Behavior
-
-When adding an actor from TMDB using the `/add_actor_from_tmdb/{actor_name}` endpoint:
-
-1. The API fetches the actor's basic information (name, date of birth, gender, date of death) from TMDB.
-2. It also retrieves the actor's filmography (movies they've acted in) from TMDB.
-3. The actor's information is added to the Neo4j database as an Actor node.
-4. Each movie in the actor's filmography is added as a Movie node (if it doesn't already exist).
-5. Relationships (ACTED_IN) are created between the Actor node and each Movie node.
-
-This allows you to quickly populate your database with an actor and their complete filmography in a single API call.
-
-When retrieving an actor's filmography using the `/actors/{name}/filmography` endpoint:
-
-1. The API searches for the actor in the Neo4j database.
-2. If found, it retrieves all the movies the actor has acted in (connected by the ACTED_IN relationship).
-3. The response includes the actor's information and a list of their movies.
-4. If the actor is not found or has no movies, a 404 error is returned.
-
-This endpoint allows you to quickly retrieve an actor's complete filmography as stored in your Neo4j database, without needing to make additional API calls to TMDB.
-
-## Error Handling
-
-The API uses standard HTTP status codes to indicate the success or failure of requests. In case of errors, a JSON response will be returned with an error message.
-
-## Logging
-
-The API logs important events to a file named `api_log.txt`. Check this file for debugging information and to monitor API activity.
+4. **Navigation**
+   - View all actors
+   ![All Actors](Screenshots/all-actors.png)
+   - View all movies
+   ![All Movies](Screenshots/all-movies.png)
+   - Browser history integration
+     - Actor search url example: http://localhost:3000/?q=Daniel+Radcliffe&type=actor
+     - Movie search url example: http://localhost:3000/?q=Harry+Potter+and+the+Philosopher%27s+Stone&type=movie 

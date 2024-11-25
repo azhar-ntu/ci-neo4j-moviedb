@@ -1,0 +1,34 @@
+services:
+  backend:
+    image: azharntu/in6299-ci-neo4j-moviedb-backend:latest
+    ports:
+      - "10000:10000"
+    environment:
+      - NEO4J_URI=bolt://host.docker.internal:7687  # For Neo4j running on non-docker neo4j instance
+      # - NEO4J_URI=bolt://localhost:7687      # Local Neo4j in same docker network
+      # - NEO4J_URI=bolt://192.168.1.100:7687  # Remote Neo4
+      # - NEO4J_URI=bolt+s://8160b5f6.databases.neo4j.io # For Neo4j running on auradb neo4j instance with ssl
+      - NEO4J_USER=neo4j # Replace with your Neo4j username
+      - NEO4J_PASSWORD=password # Replace with your Neo4j password
+      - TMDB_API_KEY=535b98608031a939cdef34fb2a98ebc5 # Replace with TMDB API key
+      - TMDB_BASE_URL=https://api.themoviedb.org/3
+      - PORT=10000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
+
+  frontend:
+    image: azharntu/in6299-ci-neo4j-moviedb-frontend:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:10000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

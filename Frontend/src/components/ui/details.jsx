@@ -55,7 +55,7 @@ const DetailsCard = ({ data, type, onDataUpdate }) => {
   const updateActorData = async (actorName) => {
     setIsUpdatingActor(true);
     try {
-      const updateResponse = await apiService.postData(
+      const updateResponse = await apiService.putData(
         `/actor/update/${encodeURIComponent(actorName)}`
       );
       
