@@ -72,8 +72,8 @@ docker-compose -f docker-compose.external.yaml up
 
 
 ##### Target End State
-After docker-compose up, the main frontend application will be available at [localhost:3000](http://localhost:3000)
-The backend application will be available at [localhost:10000](http://localhost:10000)
+- After docker-compose up, the main frontend application will be available at [localhost:3000](http://localhost:3000)
+- The backend application will be available at [localhost:10000](http://localhost:10000)
 
 
 ##### Stopping Docker Services
@@ -132,8 +132,8 @@ npm run build
 npm run start
 ```
 ##### Target End State
-The main frontend application will be available at [localhost:3000](http://localhost:3000)
-The backend application will be available at [localhost:10000](http://localhost:10000)
+- The main frontend application will be available at [localhost:3000](http://localhost:3000)
+- The backend application will be available at [localhost:10000](http://localhost:10000)
 
 ## Environment Variables
 
