@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, Suspense } from "react";
-import { Search, User, Film } from "lucide-react";
+import { User, Film } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { SearchBar } from "@/components/ui/searchbar";
 import { DetailsCard } from "@/components/ui/details";
 import { apiService } from "@/lib/api-config";
-import Link from 'next/link';
+import { WelcomeMessage } from "@/components/ui/welcome";
 
 // Dynamically import ForceGraph2D to avoid SSR issues
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
@@ -58,15 +58,15 @@ const CypherQueryDisplay = ({ query }) => {
 const capitalizeWords = (str) => {
   return str
     .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 };
 
 const addActorFromTMDB = async (actorName) => {
   try {
     const formattedName = capitalizeWords(actorName.trim());
-    
+
     const response = await apiService.postData(
       `/add_actor_from_tmdb/${encodeURIComponent(formattedName)}`
     );
@@ -123,6 +123,10 @@ export default function Home() {
   const [showCypherQuery, setShowCypherQuery] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [lastSearchedQuery, setLastSearchedQuery] = useState("");
+  const [hasActors, setHasActors] = useState(true);
+  const [isSeeding, setIsSeeding] = useState(false);
+  const [toast, setToast] = useState(null);
+
 
   // Initialize state from URL on component mount
   useEffect(() => {
@@ -157,7 +161,7 @@ export default function Home() {
         name: data.actor.name,
         type: "actor",
         val: 45,
-        collisionRadius: 80
+        collisionRadius: 80,
       });
 
       // Add movie nodes and connections (limit to first 29 movies)
@@ -168,13 +172,13 @@ export default function Home() {
           type: "movie",
           val: 40,
           year: movie.year,
-          collisionRadius: 75
+          collisionRadius: 75,
         });
 
         links.push({
           source: data.actor.name,
           target: movie.title,
-          distance: 500
+          distance: 500,
         });
       });
     } else if (type === "movie" && data?.movie && data?.actors) {
@@ -185,7 +189,7 @@ export default function Home() {
         type: "movie",
         val: 45,
         year: data.movie.year,
-        collisionRadius: 80
+        collisionRadius: 80,
       });
 
       // Add actor nodes and connections (limit to first 29 actors)
@@ -195,13 +199,13 @@ export default function Home() {
           name: actor.name,
           type: "actor",
           val: 40,
-          collisionRadius: 75
+          collisionRadius: 75,
         });
 
         links.push({
           source: data.movie.title,
           target: actor.name,
-          distance: 500
+          distance: 500,
         });
       });
     }
@@ -220,7 +224,7 @@ export default function Home() {
 
     router.push("/", { scroll: false });
   };
-  // Add effect to handle browser navigation
+
   useEffect(() => {
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
@@ -246,12 +250,68 @@ export default function Home() {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
+
+  useEffect(() => {
+    const checkForActors = async () => {
+      try {
+        const response = await apiService.fetchData("/actors");
+        const data = await response.json();
+        setHasActors(data && data.length > 0);
+      } catch (error) {
+        console.error("Error checking for actors:", error);
+        setHasActors(false);
+      }
+    };
+
+    checkForActors();
+  }, []);
+
+  const handleSeedActors = async () => {
+    setIsSeeding(true);
+    const startTime = Date.now();
+
+    setToast({
+      title: 'Seeding Database',
+      description: 'Adding actors and their filmographies...',
+      loading: true
+    });
   
+    try {
+      const response = await apiService.postData('/seed/actors');
+      if (response.ok) {
+        const data = await response.json();
+        const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+        
+        // Show success toast
+        setToast({
+          title: 'Database Seeded!',
+          description: `Added ${data.total_successful} actors in ${duration}s`,
+          loading: false
+        });
+        
+        // Clear toast after 5 seconds
+        setTimeout(() => setToast(null), 5000);
+        setHasActors(true);
+      }
+    } catch (error) {
+      console.error('Error seeding actors:', error);
+      setToast({
+        title: 'Seeding Failed',
+        description: 'Please try again',
+        loading: false
+      });
+      setTimeout(() => setToast(null), 3000);
+      setError('Failed to seed actors. Please try again.');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   const handleSearch = async (query = searchQuery, type = searchType) => {
     if (!query.trim()) return;
 
     const formattedQuery = type === "actor" ? capitalizeWords(query) : query;
-    
+
     const params = new URLSearchParams();
     params.set("q", formattedQuery);
     params.set("type", type);
@@ -374,7 +434,7 @@ RETURN movie, actors`;
     setCurrentQuery("");
     setNotFound(false);
     setLastSearchedQuery("");
-    
+
     // Navigate to the new path
     router.push(path);
   };
@@ -386,18 +446,18 @@ RETURN movie, actors`;
           <div className="flex justify-between items-center">
             <CardTitle>🎬 Movie Database Explorer 🍿</CardTitle>
             <div className="flex gap-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex items-center gap-2"
-                onClick={() => handleNavigation('/actors')}
+                onClick={() => handleNavigation("/actors")}
               >
                 <User size={16} />
                 View All Actors
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex items-center gap-2"
-                onClick={() => handleNavigation('/movies')}
+                onClick={() => handleNavigation("/movies")}
               >
                 <Film size={16} />
                 View All Movies
@@ -415,7 +475,18 @@ RETURN movie, actors`;
               onTypeChange={handleTypeChange}
             />
           </Suspense>
+          {!hasActors && (
+            <WelcomeMessage
+              onSeedActors={handleSeedActors}
+              isLoading={isSeeding}
+            />
+          )}
 
+          {error && (
+            <div className="text-red-500 mb-4 p-4 bg-red-50 rounded-lg mt-4">
+              {error}
+            </div>
+          )}
           {error && (
             <div className="text-red-500 mb-4 p-4 bg-red-50 rounded-lg">
               {error}
@@ -576,8 +647,9 @@ RETURN movie, actors`;
                 </div>
               </div>
               <p className="text-sm text-gray-500 mt-2 text-center italic">
-                  * Graph visualization shows only the first 25 connections for better readability. See complete list below.
-                </p>
+                * Graph visualization shows only the first 25 connections for
+                better readability. See complete list below.
+              </p>
               {/* Results List */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between px-2">

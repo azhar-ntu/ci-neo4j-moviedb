@@ -53,6 +53,19 @@ To use an external Neo4j instance (like Neo4j Desktop or AuraDB):
 docker-compose -f docker-compose.external.yaml up
 ```
 
+##### Stopping Docker Services
+To stop and teardown the services, run ```docker-compose down```
+
+```bash
+docker-compose down
+# or docker-compose -f docker-compose.dev.yaml down
+# or docker-compose -f docker-compose.external.yaml down
+
+# To clean up neo4j database or start fresh:
+docker volume rm neo4j_data
+docker volume rm neo4j_logs
+```
+
 ### 4. Running Services Locally
 
 To run the services without Docker:
