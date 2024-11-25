@@ -527,3 +527,9 @@
 2024-11-25 04:42:44,506 - INFO - Actor added to Neo4j with filmography: Florence Pugh
 2024-11-25 04:42:45,321 - INFO - Actor added to Neo4j with filmography: Olivia Colman
 2024-11-25 04:42:45,822 - INFO - Seeded actors - Success: 100, Failed: 0
+2024-11-25 06:00:33,043 - INFO - Actor added to Neo4j with filmography: Billy Zane
+2024-11-25 06:01:13,431 - INFO - Actor added to Neo4j with filmography: Victor Garber
+2024-11-25 06:01:34,272 - INFO - Actor added to Neo4j with filmography: Kathy Bates
+2024-11-25 06:01:41,052 - INFO - Actor added to Neo4j with filmography: Bill Paxton
+2024-11-25 06:02:08,190 - INFO - Actor added to Neo4j with filmography: Ioan Gruffudd
+2024-11-25 06:09:00,707 - INFO - Actor added to Neo4j with filmography: Daniel Radcliffe

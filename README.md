@@ -24,11 +24,15 @@ cd ci-neo4j-moviedb
 ### 1. Using Pre-built Docker Images
 
 The simplest way to run the application is using the pre-built Docker images:
+- [Frontend](https://hub.docker.com/r/azharntu/in6299-ci-neo4j-moviedb-frontend)
+- [Backend](https://hub.docker.com/r/azharntu/in6299-ci-neo4j-moviedb-backend)
+- [Neo4j](https://hub.docker.com/_/neo4j)
 
 ```bash
 # Pull the images
 docker pull azharntu/in6299-ci-neo4j-moviedb-frontend:latest
 docker pull azharntu/in6299-ci-neo4j-moviedb-backend:latest
+docker pull neo4j:5.20.0
 
 # Run using docker-compose
 docker-compose up
@@ -36,7 +40,7 @@ docker-compose up
 
 ### 2. Building Docker Images Locally
 
-If you want to build the images yourself:
+If you want to build the frontend & backend images yourself (e.g after code modification):
 
 ```bash
 # Build and run using docker-compose
@@ -47,11 +51,30 @@ docker-compose -f docker-compose.dev.yaml up --build
 
 To use an external Neo4j instance (like Neo4j Desktop or AuraDB):
 
-```bash
+```yaml
 # Edit docker-compose.external.yaml to set your Neo4j connection details
+environment:
+      - NEO4J_URI=bolt://host.docker.internal:7687  # For Neo4j running on non-docker neo4j instance
+      # - NEO4J_URI=bolt://localhost:7687      # Local Neo4j in same docker network
+      # - NEO4J_URI=bolt://192.168.1.100:7687  # Remote Neo4
+      # - NEO4J_URI=bolt+s://8160b5f6.databases.neo4j.io # For Neo4j running on auradb neo4j instance with ssl
+      - NEO4J_USER=neo4j # Replace with your Neo4j username
+      - NEO4J_PASSWORD=password # Replace with your Neo4j password
+      - TMDB_API_KEY=535b98608031a939cdef34fb2a98ebc5 # Replace with TMDB API key
+      - TMDB_BASE_URL=https://api.themoviedb.org/3
+      - PORT=10000
+```
+
+```bash
 # Then run:
 docker-compose -f docker-compose.external.yaml up
 ```
+
+
+###### Target End State
+After docker-compose up, the main frontend application will be available at [localhost:3000](http://localhost:3000)
+The backend application will be available at [localhost:10000](http://localhost:10000)
+
 
 ##### Stopping Docker Services
 To stop and teardown the services, run ```docker-compose down```
@@ -62,13 +85,18 @@ docker-compose down
 # or docker-compose -f docker-compose.external.yaml down
 
 # To clean up neo4j database or start fresh:
-docker volume rm neo4j_data
-docker volume rm neo4j_logs
+docker volume rm ci-neo4j-moviedb_neo4j_data    
+docker volume rm ci-neo4j-moviedb_neo4j_logs
 ```
 
-### 4. Running Services Locally
+### 4. Running Services Without Docker
 
-To run the services without Docker:
+To run the services without Docker, for development purposes or live reloading, ensure you have the following installed / available:
+
+- Python 3.8+
+- NodeJS 18   
+- Neo4j Database Already Setup and running
+- TMDB API Key (For fetching movie/actor data from TMDB)
 
 #### Backend (Python/FastAPI):
 ```bash
@@ -103,7 +131,9 @@ npm run dev
 npm run build
 npm run start
 ```
-
+###### Target End State
+The main frontend application will be available at [localhost:3000](http://localhost:3000)
+The backend application will be available at [localhost:10000](http://localhost:10000)
 ## Environment Variables
 
 ### Backend
@@ -194,34 +224,45 @@ POST /seed/actors
 ```
 Seed the database with a predefined list of actors.
 
-## Frontend Functionality (page.js)
+---
+## Frontend Functionality (Next.js)
 
-The frontend application provides:
+The frontend application at [localhost:3000](http://localhost:3000) provides:
 
 1. **Search Interface**
-   - Dual-mode search for actors or movies
+   - Initial welcome screen with database seeding feature (only when database is empty / no actors in database)
+   ![Welcome Screen](Screenshots/welcome.png)
+   - Dual-mode search for actors or movies, navigation to view all actors or movies pages
+   ![Search Interface](Screenshots/search.png)
    - Auto-complete suggestions
-   - Support for adding missing actors from TMDB
+   ![Autocomplete suggestions](Screenshots/autocomplete.png)
+   - Support for adding actor data by fetching from The Movie Database (TMDB) API
+   ![Add Actor Button](Screenshots/add-actor.png)
+     - After clicking the button, the actor data will be fetched from TMDB and added to the database
+   ![Added Actor](Screenshots/add-actor-2.png)
 
-2. **Graph Visualization**
+2. **Graph Visualization with Learning Oriented Features**
+   - Cypher query visualization with toggle for query display
+   ![Cypher Query](Screenshots/cypher-query.png)
    - Interactive force-directed graph showing relationships
-   - Color-coded nodes (red for actors, teal for movies)
-   - Click-through navigation
-   - Automatic zoom and centering
-
-3. **Detailed Information**
+   ![Graph Visualization](Screenshots/graph.png)
+     - Color-coded nodes (red for actors, green for movies)
+  
+3. **Actor & Movie Information**
    - Actor filmographies with year information
-   - Movie cast lists
+   ![Actor Filmography](Screenshots/filmography.png)
+   - Movie cast lists (limited to actors in the database)
+   ![Movie Cast](Screenshots/cast.png)
    - Profile images for actors
+   ![Actor Profile](Screenshots/profile.png)
    - Movie posters
+   ![Movie Poster](Screenshots/poster.png)
 
-4. **Developer Features**
-   - Cypher query visualization
-   - Toggle for query display
-   - URL-based state management
-   - Responsive design
-
-5. **Navigation**
+4. **Navigation**
    - View all actors
+   ![All Actors](Screenshots/all-actors.png)
    - View all movies
+   ![All Movies](Screenshots/all-movies.png)
    - Browser history integration
+     - Actor search url example: http://localhost:3000/?q=Daniel+Radcliffe&type=actor
+     - Movie search url example: http://localhost:3000/?q=Harry+Potter+and+the+Philosopher%27s+Stone&type=movie 

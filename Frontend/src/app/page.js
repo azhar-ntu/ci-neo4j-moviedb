@@ -56,6 +56,15 @@ const CypherQueryDisplay = ({ query }) => {
 };
 
 const capitalizeWords = (str) => {
+  // Check if string is mixed case (has both upper and lower case letters)
+  const hasMixedCase = str !== str.toUpperCase() && str !== str.toLowerCase();
+  
+  // If mixed case, return original string unchanged
+  if (hasMixedCase) {
+    return str;
+  }
+  
+  // Otherwise, apply the capitalization transformation
   return str
     .toLowerCase()
     .split(" ")
