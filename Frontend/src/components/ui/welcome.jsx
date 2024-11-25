@@ -10,7 +10,9 @@ const WelcomeMessage = ({ onSeedActors, isLoading }) => {
           <div>
             <h3 className="text-lg font-semibold mb-1">Welcome! Your database is empty 👋</h3>
             <p className="text-sm text-gray-600">
-              Get started by seeding the database with 100 famous actors and their filmographies
+                {isLoading 
+                    ? "Adding actors and fetching their filmographies from TMDB, this might take a while, refresh the page at any time ..."
+                    : "Get started by seeding the database with 100 famous actors"}            
             </p>
           </div>
           <Button 
