@@ -20,7 +20,8 @@ There are several ways to run this application, first clone the repository:
 git clone https://github.com/azhar-ntu/ci-neo4j-moviedb.git
 cd ci-neo4j-moviedb
 ```
-Docker will be required to be installed to run the application for methods 1 - 3. Ensure Docker Desktop is running before starting the steps below.
+Docker will be required to be installed to run the application for methods 1 - 3. Ensure Docker Desktop is running and that the following ports are not occupied (3000, 10000, 7474, 7687) before starting the steps below.
+
 ### 1. Using Pre-built Docker Images
 
 The simplest way to run the application is using the pre-built Docker images:
